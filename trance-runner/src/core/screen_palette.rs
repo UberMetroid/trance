@@ -37,7 +37,7 @@
 
 
 
-pub use screensaver_api::ScreenPalette;
+pub use trance_api::ScreenPalette;
 
 #[cfg(test)]
 mod tests {

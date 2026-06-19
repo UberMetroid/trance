@@ -49,4 +49,4 @@ pub struct NetworkAdapterInfo {
     pub is_up: bool,
 }
 
-pub use screensaver_api::SystemInfo;
+pub use trance_api::SystemInfo;

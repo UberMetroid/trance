@@ -1,5 +1,5 @@
 [package]
-name = "screensaver-runner"
+name = "trance-runner"
 version = "2026.6.14-2"
 edition = "2021"
 description = "Shared runner logic for the terminal screensavers"
@@ -7,5 +7,5 @@ license = "MIT"
 
 [dependencies]
 libc = "0.2"
-screensaver-api = { path = "../screensaver-api" }
+trance-api = { path = "../trance-api" }
 libloading = "0.8"

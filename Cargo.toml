@@ -1,9 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "screensaver-api",
-    "screensaver-runner",
+    "trance-api",
+    "trance-runner",
     "trance",
+    "trance-applet",
 ]
 
 [profile.release]

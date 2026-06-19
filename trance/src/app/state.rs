@@ -36,8 +36,8 @@ impl Default for AppState {
 
 impl AppState {
     pub fn new() -> Self {
-        let savers = screensaver_runner::discovery::detect_screensavers();
-        let is_dark = screensaver_runner::toolkit::sys_info::query_dark_mode();
+        let savers = trance_runner::discovery::detect_screensavers();
+        let is_dark = trance_runner::toolkit::sys_info::query_dark_mode();
         let default_accent = Self::get_accent_by_index(0, is_dark);
         let q_idx = std::time::SystemTime::now()
             .duration_since(std::time::SystemTime::UNIX_EPOCH)
@@ -69,7 +69,7 @@ impl AppState {
         state.load_config();
 
         // Always query current OS theme value and use the associated accent
-        let is_dark = screensaver_runner::toolkit::sys_info::query_dark_mode();
+        let is_dark = trance_runner::toolkit::sys_info::query_dark_mode();
         state.dark_mode = is_dark;
         state.accent_color = Self::get_accent_by_index(state.theme_idx, is_dark);
 

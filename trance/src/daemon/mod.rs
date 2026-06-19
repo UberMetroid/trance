@@ -1,7 +1,7 @@
 pub mod idle;
 
 use crate::app::AppState;
-use screensaver_runner::launcher::{launch_screensaver, LaunchMode, ALLOWED_SAVERS};
+use trance_runner::launcher::{launch_screensaver, LaunchMode, ALLOWED_SAVERS};
 use std::fs;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -36,7 +36,7 @@ pub fn run_daemon() -> Result<(), Box<dyn std::error::Error>> {
     println!("trance daemon running (pid {})...", std::process::id());
 
     let mut state = AppState::new();
-    let mut active_child: Option<screensaver_runner::launcher::ScreensaverProcess> = None;
+    let mut active_child: Option<trance_runner::launcher::ScreensaverProcess> = None;
 
     let mut tick_counter = 0;
 

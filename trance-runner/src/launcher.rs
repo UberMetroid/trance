@@ -354,7 +354,7 @@ fn get_secondary_monitors_to_disable() -> Vec<String> {
 ///
 /// Example for daemon idle:
 /// ```ignore
-/// let child = screensaver_runner::launcher::launch_screensaver("security", LaunchMode::Daemon)?;
+/// let child = trance_runner::launcher::launch_screensaver("security", LaunchMode::Daemon)?;
 /// ```
 pub fn launch_screensaver(name: &str, mode: LaunchMode) -> std::io::Result<ScreensaverProcess> {
     let mut disabled_monitors = Vec::new();

@@ -5,4 +5,4 @@ pub mod logo_block;
 pub mod screen_palette;
 pub mod screensaver;
 
-pub use screensaver_api::{TerminalCell, LcgRng, hsl_to_rgb, rgb_to_hsl, percentage, lerp};
+pub use trance_api::{TerminalCell, LcgRng, hsl_to_rgb, rgb_to_hsl, percentage, lerp};

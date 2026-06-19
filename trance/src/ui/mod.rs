@@ -12,11 +12,11 @@ pub mod helpers;
 
 pub fn draw_ui(f: &mut ratatui::Frame, state: &mut AppState) {
     let size = f.area();
-    let is_dark = screensaver_runner::toolkit::sys_info::query_dark_mode();
+    let is_dark = trance_runner::toolkit::sys_info::query_dark_mode();
     state.dark_mode = is_dark;
     state.accent_color = AppState::get_accent_by_index(state.theme_idx, is_dark);
 
-    let theme_palette = screensaver_runner::core::screen_palette::ScreenPalette::from_system(
+    let theme_palette = trance_runner::core::screen_palette::ScreenPalette::from_system(
         state.accent_color,
         is_dark,
     );
@@ -46,7 +46,7 @@ pub fn draw_ui(f: &mut ratatui::Frame, state: &mut AppState) {
         .split(size);
 
     // 1. Draw Header
-    let sys_info = screensaver_runner::toolkit::sys_info::get_system_info();
+    let sys_info = trance_runner::toolkit::sys_info::get_system_info();
     let username = env::var("USER").unwrap_or_else(|_| "user".to_string());
     let hostname = fs::read_to_string("/proc/sys/kernel/hostname")
         .map(|s| s.trim().to_string())

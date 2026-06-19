@@ -1,5 +1,5 @@
 //! Cross-platform screensaver runtime host.
-//! Vendored from `runner::screensaver_runner`.
+//! Vendored from `runner::trance_runner`.
 
 use crate::core::screensaver::Screensaver;
 use crate::core::TerminalCell;
@@ -62,7 +62,7 @@ fn run_preview_stub(_saver: &mut dyn Screensaver) -> isize {
 
 /// Loads a screensaver plugin dynamic library and runs it fullscreen.
 pub fn run_plugin_fullscreen(plugin_path: &str) -> Result<isize, Box<dyn std::error::Error>> {
-    use screensaver_api::ScreensaverInstance;
+    use trance_api::ScreensaverInstance;
 
     unsafe {
         let lib = libloading::Library::new(plugin_path)?;

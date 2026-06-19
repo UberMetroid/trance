@@ -4,12 +4,12 @@ pub mod ui;
 
 /// Returns the list of detected screensavers
 pub fn list_screensavers() -> Vec<String> {
-    screensaver_runner::discovery::detect_screensavers()
+    trance_runner::discovery::detect_screensavers()
 }
 
 /// Spawns a screensaver using the launcher in Preview mode
 pub fn start_screensaver(name: &str) -> std::io::Result<()> {
-    use screensaver_runner::launcher::{launch_screensaver, LaunchMode};
+    use trance_runner::launcher::{launch_screensaver, LaunchMode};
     match launch_screensaver(name, LaunchMode::Preview) {
         Ok(mut child) => {
             let _ = child.wait();

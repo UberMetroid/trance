@@ -190,7 +190,7 @@ pub fn query_system_theme() -> SystemTheme {
     }
 }
 
-pub use screensaver_api::MonitorCellBounds;
+pub use trance_api::MonitorCellBounds;
 
 static MONITOR_LAYOUT_CACHE: OnceLock<Mutex<Option<(Vec<MonitorCellBounds>, (usize, usize), Instant)>>> = OnceLock::new();
 

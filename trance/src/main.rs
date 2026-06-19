@@ -2,10 +2,10 @@
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Register visual theme and system query callbacks for dynamically loaded screensaver plugins
-    let _ = screensaver_api::SYSTEM_INFO_CALLBACK.set(screensaver_runner::toolkit::sys_info::get_system_info);
-    let _ = screensaver_api::PALETTE_CALLBACK.set(screensaver_runner::toolkit::sys_info::query_current_palette);
-    let _ = screensaver_api::MONITOR_BOUNDS_CALLBACK.set(screensaver_runner::toolkit::sys_info::get_primary_monitor_bounds);
-    let _ = screensaver_api::IS_SECONDARY_MONITOR_CALLBACK.set(screensaver_runner::toolkit::sys_info::is_secondary_monitor);
+    let _ = trance_api::SYSTEM_INFO_CALLBACK.set(trance_runner::toolkit::sys_info::get_system_info);
+    let _ = trance_api::PALETTE_CALLBACK.set(trance_runner::toolkit::sys_info::query_current_palette);
+    let _ = trance_api::MONITOR_BOUNDS_CALLBACK.set(trance_runner::toolkit::sys_info::get_primary_monitor_bounds);
+    let _ = trance_api::IS_SECONDARY_MONITOR_CALLBACK.set(trance_runner::toolkit::sys_info::is_secondary_monitor);
 
     let args: Vec<String> = std::env::args().collect();
 
@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 std::process::exit(1);
             }
             let path = &args[2];
-            match screensaver_runner::screensaver_runner::run_plugin_fullscreen(path) {
+            match trance_runner::trance_runner::run_plugin_fullscreen(path) {
                 Ok(code) => std::process::exit(code as i32),
                 Err(e) => {
                     eprintln!("failed to execute screensaver plugin: {}", e);

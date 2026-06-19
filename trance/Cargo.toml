@@ -10,8 +10,8 @@ name = "trance"
 path = "src/main.rs"
 
 [dependencies]
-screensaver-runner = { path = "../screensaver-runner" }
-screensaver-api = { path = "../screensaver-api" }
+trance-runner = { path = "../trance-runner" }
+trance-api = { path = "../trance-api" }
 ratatui = { version = "0.30", default-features = false, features = ["crossterm", "termwiz"] }
 crossterm = { version = "0.28" }
 libc = "0.2"
