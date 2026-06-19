@@ -4,10 +4,10 @@ set -e
 
 if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
     # Stop the service for all currently logged-in users
-    if command -v loginctl >/dev/null && command -v systemctl >/dev/null; then
+    if command -v loginctl >/dev/null && command -v runuser >/dev/null && command -v systemctl >/dev/null; then
         loginctl list-users --no-legend | while read -r uid user linger state; do
-            if [ -n "$user" ]; then
-                systemctl --user -M "${user}@" stop trance-daemon.service || true
+            if [ -n "$user" ] && [ -n "$uid" ]; then
+                runuser -u "$user" -- env XDG_RUNTIME_DIR="/run/user/$uid" systemctl --user stop trance-daemon.service || true
             fi
         done
     fi
