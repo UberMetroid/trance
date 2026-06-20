@@ -2,7 +2,7 @@
 Name=Trance Applet
 Comment=Screensaver control applet for local76/COSMIC
 Type=Application
-Icon=com.system76.CosmicApplet.Trance
+Icon=display-symbolic
 Exec=trance-applet %F
 Terminal=false
 StartupNotify=true
