@@ -3,6 +3,10 @@
 set -e
 
 if [ "$1" = "configure" ]; then
+    echo "=========================================================="
+    echo "  Setting up Trance Screensaver Daemon..."
+    echo "=========================================================="
+
     # Enable the service globally for all user sessions so it runs automatically on login
     systemctl --global enable trance-daemon.service || true
 
@@ -10,11 +14,14 @@ if [ "$1" = "configure" ]; then
     if command -v loginctl >/dev/null && command -v runuser >/dev/null && command -v systemctl >/dev/null; then
         loginctl list-users --no-legend | while read -r uid user linger state; do
             if [ -n "$user" ] && [ -n "$uid" ]; then
+                echo "-> Starting user session service for: $user (UID: $uid)"
                 runuser -u "$user" -- env XDG_RUNTIME_DIR="/run/user/$uid" systemctl --user daemon-reload || true
                 runuser -u "$user" -- env XDG_RUNTIME_DIR="/run/user/$uid" systemctl --user start trance-daemon.service || true
             fi
         done
     fi
+    echo "  Setup complete. Trance Daemon is now running!"
+    echo "=========================================================="
 fi
 
 exit 0
