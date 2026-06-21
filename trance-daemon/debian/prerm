@@ -7,12 +7,12 @@ if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
     echo "  Stopping Trance Screensaver Daemon Services..."
     echo "=========================================================="
 
-    # Stop the service for all currently logged-in users
-    if command -v loginctl >/dev/null && command -v runuser >/dev/null && command -v systemctl >/dev/null; then
+    # Stop the service for all currently logged-in users using systemd's user manager API
+    if command -v loginctl >/dev/null && command -v systemctl >/dev/null; then
         loginctl list-users --no-legend | while read -r uid user linger state; do
-            if [ -n "$user" ] && [ -n "$uid" ]; then
-                echo "-> Stopping user session service for: $user (UID: $uid)"
-                runuser -u "$user" -- env XDG_RUNTIME_DIR="/run/user/$uid" systemctl --user stop trance-daemon.service || true
+            if [ -n "$user" ]; then
+                echo "-> Stopping service for: $user"
+                systemctl --user --machine="$user@" stop trance-daemon.service || true
             fi
         done
     fi
@@ -21,9 +21,9 @@ if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
 fi
 
 if [ "$1" = "remove" ]; then
-    # Disable the user service globally
-    if command -v systemctl >/dev/null; then
-        systemctl --global disable trance-daemon.service || true
+    # Disable the user service globally using standard deb-systemd-helper
+    if command -v deb-systemd-helper >/dev/null; then
+        deb-systemd-helper --user disable trance-daemon.service || true
     fi
 fi
 

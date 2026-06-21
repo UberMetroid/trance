@@ -1,0 +1,12 @@
+#!/bin/sh
+# postrm script for trance-daemon
+set -e
+
+if [ "$1" = "purge" ]; then
+    # Purge the user service enable state globally using standard deb-systemd-helper
+    if command -v deb-systemd-helper >/dev/null; then
+        deb-systemd-helper --user purge trance-daemon.service || true
+    fi
+fi
+
+exit 0

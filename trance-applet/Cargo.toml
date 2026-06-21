@@ -1,6 +1,6 @@
 [package]
 name = "trance-applet"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2024"
 license = "MIT"
 description = "COSMIC Desktop panel applet for the trance screensavers"
@@ -48,7 +48,6 @@ name = "trance-applet"
 maintainer = "Screensavers Developer <dev@local76.org>"
 extended-description = "Native System76 COSMIC Desktop panel applet for the trance screensaver daemon."
 depends = "libc6, trance"
-maintainer-scripts = "debian"
 section = "utils"
 priority = "optional"
 assets = [
@@ -60,7 +59,7 @@ assets = [
 
 [package.metadata.generate-rpm]
 name = "trance-applet"
-version = "0.2.4"
+version = "0.2.5"
 release = "1"
 arch = "x86_64"
 summary = "COSMIC Desktop panel applet for the trance screensavers"

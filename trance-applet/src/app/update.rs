@@ -154,9 +154,13 @@ impl AppModel {
                         self.screensavers[idx].clone()
                     }
                 });
+                let mut started_via_dbus = false;
                 if crate::daemon_client::is_running() {
-                    let _ = crate::daemon_client::start_preview(&saver);
-                } else {
+                    if crate::daemon_client::start_preview(&saver).is_ok() {
+                        started_via_dbus = true;
+                    }
+                }
+                if !started_via_dbus {
                     let _ = std::process::Command::new("trance-runner")
                         .args(["preview", &saver])
                         .spawn();
