@@ -17,11 +17,13 @@ pub fn spawn_event_thread(
     shutdown: Arc<AtomicBool>,
     timeout_rx: Receiver<u32>,
     initial_timeout_mins: u32,
+    is_alive: Arc<AtomicBool>,
 ) {
     thread::spawn(move || {
         if let Err(error) = run_event_loop(is_idle, shutdown, timeout_rx, initial_timeout_mins) {
             eprintln!("wayland-idle: {error}");
         }
+        is_alive.store(false, Ordering::SeqCst);
     });
 }
 

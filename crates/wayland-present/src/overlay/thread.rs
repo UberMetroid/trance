@@ -33,11 +33,13 @@ pub fn spawn_event_thread(
     visible: Arc<AtomicBool>,
     shutdown: Arc<AtomicBool>,
     outputs: OutputRegistry,
+    is_alive: Arc<AtomicBool>,
 ) {
     thread::spawn(move || {
         if let Err(message) = run_event_loop(ready_tx, command_rx, visible, shutdown, outputs) {
             eprintln!("wayland-present: {message}");
         }
+        is_alive.store(false, Ordering::SeqCst);
     });
 }
 

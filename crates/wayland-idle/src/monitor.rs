@@ -14,6 +14,7 @@ pub struct IdleMonitor {
     is_idle: Arc<AtomicBool>,
     timeout_tx: mpsc::Sender<u32>,
     shutdown: Arc<AtomicBool>,
+    is_alive: Arc<AtomicBool>,
 }
 
 impl IdleMonitor {
@@ -26,18 +27,21 @@ impl IdleMonitor {
         let is_idle = Arc::new(AtomicBool::new(false));
         let (timeout_tx, timeout_rx) = mpsc::channel();
         let shutdown = Arc::new(AtomicBool::new(false));
+        let is_alive = Arc::new(AtomicBool::new(true));
 
         wayland::spawn_event_thread(
             is_idle.clone(),
             shutdown.clone(),
             timeout_rx,
             timeout_mins,
+            is_alive.clone(),
         );
 
         Some(Self {
             is_idle,
             timeout_tx,
             shutdown,
+            is_alive,
         })
     }
 
@@ -49,6 +53,11 @@ impl IdleMonitor {
     /// Returns `true` when the user has been idle longer than the configured timeout.
     pub fn is_idle(&self) -> bool {
         self.is_idle.load(Ordering::SeqCst)
+    }
+
+    /// Returns `true` if the Wayland event monitoring thread is still running.
+    pub fn is_alive(&self) -> bool {
+        self.is_alive.load(Ordering::SeqCst)
     }
 
     /// Update the idle timeout. The compositor is re-notified on the next event-loop tick.

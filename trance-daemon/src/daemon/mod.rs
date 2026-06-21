@@ -101,6 +101,13 @@ pub fn run_daemon() -> Result<(), Box<dyn std::error::Error>> {
         std::thread::sleep(MAIN_LOOP_INTERVAL);
         tick_counter = tick_counter.saturating_add(1);
 
+        if !idle_monitor.is_alive() {
+            return Err("Wayland idle monitor connection lost".into());
+        }
+        if !overlay_presenter.is_alive() {
+            return Err("Wayland presenter connection lost".into());
+        }
+
         for command in controller.drain_commands() {
             match command {
                 DaemonCommand::Preview(name) => {

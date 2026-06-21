@@ -15,6 +15,7 @@ pub struct OverlayPresenter {
     visible: Arc<AtomicBool>,
     shutdown: Arc<AtomicBool>,
     outputs: OutputRegistry,
+    is_alive: Arc<AtomicBool>,
 }
 
 impl OverlayPresenter {
@@ -29,6 +30,7 @@ impl OverlayPresenter {
         let visible = Arc::new(AtomicBool::new(false));
         let shutdown = Arc::new(AtomicBool::new(false));
         let outputs = OutputRegistry::new();
+        let is_alive = Arc::new(AtomicBool::new(true));
 
         spawn_event_thread(
             ready_tx,
@@ -36,6 +38,7 @@ impl OverlayPresenter {
             visible.clone(),
             shutdown.clone(),
             outputs.clone(),
+            is_alive.clone(),
         );
 
         match ready_rx.recv_timeout(Duration::from_secs(5)) {
@@ -44,6 +47,7 @@ impl OverlayPresenter {
                 visible,
                 shutdown,
                 outputs,
+                is_alive,
             }),
             _ => None,
         }
@@ -55,6 +59,11 @@ impl OverlayPresenter {
 
     pub fn is_visible(&self) -> bool {
         self.visible.load(Ordering::SeqCst)
+    }
+
+    /// Returns `true` if the Wayland presentation thread is still running.
+    pub fn is_alive(&self) -> bool {
+        self.is_alive.load(Ordering::SeqCst)
     }
 
     pub fn output_layouts(&self) -> Vec<OutputLayout> {
