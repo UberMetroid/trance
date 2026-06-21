@@ -8,7 +8,9 @@ use zbus::names::UniqueName;
 #[derive(Debug, Clone)]
 pub struct Inhibitor {
     pub cookie: u32,
+    #[allow(dead_code)]
     pub application_name: String,
+    #[allow(dead_code)]
     pub reason: String,
     pub client: UniqueName<'static>,
 }
@@ -48,9 +50,13 @@ impl InhibitorState {
         cookie
     }
 
-    pub fn remove(&self, cookie: u32) -> bool {
+    /// Remove an inhibitor only when `cookie` belongs to `client`.
+    pub fn remove_for_client(&self, cookie: u32, client: &UniqueName<'_>) -> bool {
         let mut inhibitors = self.inhibitors.lock().unwrap();
-        if let Some(index) = inhibitors.iter().position(|entry| entry.cookie == cookie) {
+        if let Some(index) = inhibitors
+            .iter()
+            .position(|entry| entry.cookie == cookie && entry.client == *client)
+        {
             inhibitors.remove(index);
             true
         } else {

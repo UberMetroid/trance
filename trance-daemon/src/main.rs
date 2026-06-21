@@ -23,11 +23,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let sub = &args[1];
         if sub == "run-plugin" {
             if args.len() < 3 {
-                eprintln!("error: missing plugin path.\nusage: trance-daemon run-plugin <path>");
+                eprintln!("error: missing saver name.\nusage: trance-daemon run-plugin <saver>");
                 std::process::exit(1);
             }
-            let path = &args[2];
-            match trance_runner::trance_runner::run_plugin_fullscreen(path) {
+            let name = &args[2];
+            let path = trance_runner::launcher::resolve_saver_binary(
+                name,
+                &trance_runner::launcher::LaunchMode::Preview,
+            )
+            .unwrap_or_else(|error| {
+                eprintln!("error: {error}");
+                std::process::exit(1);
+            });
+            match trance_runner::trance_runner::run_plugin_fullscreen(
+                path.to_string_lossy().as_ref(),
+            ) {
                 Ok(code) => std::process::exit(code as i32),
                 Err(e) => {
                     eprintln!("failed to execute screensaver plugin: {}", e);
@@ -43,7 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 usage:
   trance-daemon                     run the background idle daemon (default)
   trance-daemon daemon | --daemon   run the background idle daemon
-  trance-daemon run-plugin <path>   run a screensaver plugin fullscreen
+  trance-daemon run-plugin <saver>  run a trusted screensaver plugin fullscreen
   trance-daemon --help | -h         show this help message"
             );
         } else {

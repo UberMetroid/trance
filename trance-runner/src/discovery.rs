@@ -1,4 +1,4 @@
-use super::launcher::ALLOWED_SAVERS;
+use super::launcher::{is_allowed_saver, ALLOWED_SAVERS};
 use std::path::PathBuf;
 
 /// Retrieve all trusted directories where screensavers are installed or placed.
@@ -69,9 +69,12 @@ pub fn detect_screensavers() -> Vec<String> {
                             // Check if file is executable
                             if metadata.permissions().mode() & 0o111 != 0 {
                                 if let Some(name) = entry.file_name().to_str() {
-                                    let clean_name = name.to_string();
-                                    if !savers.contains(&clean_name) {
-                                        savers.push(clean_name);
+                                    if is_allowed_saver(name) {
+                                        let clean_name =
+                                            super::launcher::sanitize_saver_name(name).unwrap();
+                                        if !savers.contains(&clean_name) {
+                                            savers.push(clean_name);
+                                        }
                                     }
                                 }
                             }
@@ -79,9 +82,12 @@ pub fn detect_screensavers() -> Vec<String> {
                         #[cfg(not(unix))]
                         {
                             if let Some(name) = entry.file_name().to_str() {
-                                let clean_name = name.to_string();
-                                if !savers.contains(&clean_name) {
-                                    savers.push(clean_name);
+                                if is_allowed_saver(name) {
+                                    let clean_name =
+                                        super::launcher::sanitize_saver_name(name).unwrap();
+                                    if !savers.contains(&clean_name) {
+                                        savers.push(clean_name);
+                                    }
                                 }
                             }
                         }

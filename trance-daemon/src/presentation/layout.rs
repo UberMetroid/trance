@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: MIT
+
+use std::sync::{OnceLock, RwLock};
+
+use trance_api::MonitorCellBounds;
+use trance_runner::plugin_session::PluginSession;
+use wayland_present::OutputLayout;
+
+static PRIMARY_BOUNDS: OnceLock<RwLock<MonitorCellBounds>> = OnceLock::new();
+
+pub fn normalize_layout_positions(layouts: &mut [OutputLayout]) {
+    if layouts.len() <= 1 {
+        return;
+    }
+    if layouts.iter().any(|layout| layout.x != 0 || layout.y != 0) {
+        return;
+    }
+
+    let mut x = 0i32;
+    for layout in layouts.iter_mut() {
+        layout.x = x;
+        layout.y = 0;
+        x += layout.width as i32;
+    }
+}
+
+/// Caps span simulation cost: full virtual-desktop coverage with a bounded cell count.
+pub fn span_simulation_grid(session: &PluginSession, total_w: u32, total_h: u32) -> (usize, usize) {
+    const MAX_SPAN_CELLS: usize = 12_000;
+    let (cols, rows) = session.grid_for_pixels(total_w, total_h);
+    let cells = cols.saturating_mul(rows);
+    if cells <= MAX_SPAN_CELLS {
+        return (cols, rows);
+    }
+
+    let scale = (MAX_SPAN_CELLS as f32 / cells as f32).sqrt();
+    let capped_cols = ((cols as f32 * scale).floor() as usize).max(1);
+    let capped_rows = ((rows as f32 * scale).floor() as usize).max(1);
+    println!(
+        "trance-daemon: span grid capped from {cols}x{rows} ({cells} cells) to {capped_cols}x{capped_rows}",
+        capped_cols = capped_cols,
+        capped_rows = capped_rows,
+    );
+    (capped_cols, capped_rows)
+}
+
+pub fn virtual_desktop(layouts: &[OutputLayout]) -> (i32, i32, u32, u32) {
+    let min_x = layouts.iter().map(|layout| layout.x).min().unwrap_or(0);
+    let min_y = layouts.iter().map(|layout| layout.y).min().unwrap_or(0);
+    let max_x = layouts
+        .iter()
+        .map(|layout| layout.x + layout.width as i32)
+        .max()
+        .unwrap_or(0);
+    let max_y = layouts
+        .iter()
+        .map(|layout| layout.y + layout.height as i32)
+        .max()
+        .unwrap_or(0);
+    (
+        min_x,
+        min_y,
+        (max_x - min_x).max(1) as u32,
+        (max_y - min_y).max(1) as u32,
+    )
+}
+
+pub fn monitor_cell_bounds(
+    layout: OutputLayout,
+    min_x: i32,
+    min_y: i32,
+    total_w: u32,
+    total_h: u32,
+    virtual_cols: usize,
+    virtual_rows: usize,
+    is_primary: bool,
+) -> MonitorCellBounds {
+    let rel_x1 = layout.x - min_x;
+    let rel_y1 = layout.y - min_y;
+    let rel_x2 = rel_x1 + layout.width as i32;
+    let rel_y2 = rel_y1 + layout.height as i32;
+
+    MonitorCellBounds {
+        start_col: ((rel_x1 as usize).saturating_mul(virtual_cols)) / total_w as usize,
+        end_col: ((rel_x2 as usize).saturating_mul(virtual_cols)) / total_w as usize,
+        start_row: ((rel_y1 as usize).saturating_mul(virtual_rows)) / total_h as usize,
+        end_row: ((rel_y2 as usize).saturating_mul(virtual_rows)) / total_h as usize,
+        is_primary,
+    }
+}
+
+pub fn primary_bounds_in_grid(
+    primary: OutputLayout,
+    min_x: i32,
+    min_y: i32,
+    total_w: u32,
+    total_h: u32,
+    virtual_cols: usize,
+    virtual_rows: usize,
+) -> MonitorCellBounds {
+    monitor_cell_bounds(
+        primary,
+        min_x,
+        min_y,
+        total_w,
+        total_h,
+        virtual_cols,
+        virtual_rows,
+        true,
+    )
+}
+
+pub fn install_primary_bounds_callback(bounds: MonitorCellBounds) {
+    let _ = PRIMARY_BOUNDS.set(RwLock::new(bounds));
+    let _ = trance_api::MONITOR_BOUNDS_CALLBACK.set(|_cols, _rows| {
+        PRIMARY_BOUNDS
+            .get()
+            .and_then(|lock| lock.read().ok())
+            .map(|guard| *guard)
+            .unwrap_or(MonitorCellBounds {
+                start_col: 0,
+                end_col: 0,
+                start_row: 0,
+                end_row: 0,
+                is_primary: true,
+            })
+    });
+}

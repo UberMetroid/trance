@@ -6,9 +6,21 @@
 //! When a Wayland session is available, [`IdleMonitor`] connects to the compositor
 //! and reports whether the user has been inactive longer than the configured timeout.
 //!
+//! The Wayland client runs on a background thread (see the `wayland` submodule);
+//! the public [`IdleMonitor`] handle is safe to poll from the daemon main loop.
+//!
 //! [`ext-idle-notify-v1`]: https://wayland.app/protocols/ext-idle-notify-v1
+//!
+//! If the extension is unavailable, [`IdleMonitor::new`] returns `None` and the
+//! daemon should refuse to start rather than falling back to X11 screensaver APIs.
 
 mod monitor;
 mod wayland;
 
 pub use monitor::IdleMonitor;
+
+// Timeout changes are forwarded to the Wayland thread without reconnecting.
+// Requires WAYLAND_DISPLAY in the daemon environment.
+// Polling is cheap: state is mirrored with atomics from the Wayland thread.
+// No X11 ScreenSaver extension fallback is attempted in this crate.
+//

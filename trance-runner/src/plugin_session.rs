@@ -31,6 +31,8 @@ pub struct PluginSession {
     upscaler: FrameUpscaler,
     render_scale: f32,
     grid: Vec<TerminalCell>,
+    content_buf: Vec<u8>,
+    pixel_buf: Vec<u8>,
     physics_accumulator: Duration,
     physics_duration: Duration,
     simulation_cols: usize,
@@ -106,6 +108,8 @@ impl PluginSession {
                 upscaler,
                 render_scale,
                 grid: Vec::new(),
+                content_buf: Vec::new(),
+                pixel_buf: Vec::new(),
                 physics_accumulator: Duration::ZERO,
                 physics_duration: Duration::from_secs_f32(1.0 / 120.0),
                 simulation_cols: 0,
@@ -156,16 +160,17 @@ impl PluginSession {
         }
     }
 
-    pub fn blit_to_monitor(
+    pub fn blit_to_monitor_into(
         &mut self,
         src: &[u8],
         src_w: u32,
         src_h: u32,
         dst_w: u32,
         dst_h: u32,
-    ) -> Vec<u8> {
+        out: &mut Vec<u8>,
+    ) {
         self.upscaler
-            .upscale_letterbox(src, src_w, src_h, dst_w, dst_h)
+            .upscale_letterbox_into(src, src_w, src_h, dst_w, dst_h, out);
     }
 
     pub fn draw_frame(&mut self, grid_cols: usize, grid_rows: usize) -> bool {
@@ -179,10 +184,12 @@ impl PluginSession {
 
     pub fn render(&mut self, cols: usize, rows: usize, width: u32, height: u32) -> Vec<u8> {
         let scanlines = self.draw_frame(cols, rows);
-        self.raster_viewport(0, 0, cols, rows, cols, rows, width, height, scanlines)
+        self.raster_viewport_internal(0, 0, cols, rows, cols, rows, width, height, scanlines);
+        let cap = self.pixel_buf.capacity();
+        std::mem::replace(&mut self.pixel_buf, Vec::with_capacity(cap))
     }
 
-    pub fn render_viewport(
+    pub fn raster_viewport(
         &mut self,
         col_start: usize,
         row_start: usize,
@@ -192,9 +199,9 @@ impl PluginSession {
         grid_rows: usize,
         width: u32,
         height: u32,
+        scanlines: bool,
     ) -> Vec<u8> {
-        let scanlines = self.draw_frame(grid_cols, grid_rows);
-        self.raster_viewport(
+        self.raster_viewport_internal(
             col_start,
             row_start,
             cols,
@@ -204,35 +211,44 @@ impl PluginSession {
             width,
             height,
             scanlines,
-        )
+        );
+        let cap = self.pixel_buf.capacity();
+        std::mem::replace(&mut self.pixel_buf, Vec::with_capacity(cap))
     }
 
-    pub fn raster_viewport(
+    fn raster_viewport_internal(
         &mut self,
         col_start: usize,
         row_start: usize,
         cols: usize,
         rows: usize,
-        _grid_cols: usize,
+        grid_cols: usize,
         _grid_rows: usize,
         width: u32,
         height: u32,
         scanlines: bool,
-    ) -> Vec<u8> {
+    ) {
         let content_w = self.renderer.content_width(cols);
         let content_h = self.renderer.content_height(rows);
-        let content = self.renderer.render_content_viewport(
+        self.renderer.render_content_viewport_into(
             &self.grid,
-            _grid_cols,
+            grid_cols,
             col_start,
             row_start,
             cols,
             rows,
             scanlines,
+            &mut self.content_buf,
         );
 
-        self.upscaler
-            .upscale_stretch(&content, content_w, content_h, width, height)
+        self.upscaler.upscale_stretch_into(
+            &self.content_buf,
+            content_w,
+            content_h,
+            width,
+            height,
+            &mut self.pixel_buf,
+        );
     }
 }
 

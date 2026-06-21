@@ -5,6 +5,16 @@
 //! Original (pre-vendoring) location: /home/jeryd/library (local76/library).
 //! Vendored on: 2026-06-12 from tag v2026.6.10.
 //! License: MIT (see top-level LICENSE file).
+//!
+//! ## Modules
+//!
+//! - [`cell_renderer`] — terminal grid → BGRA framebuffer rasterization
+//! - [`core`] — shared primitives (logo block, palette, screensaver traits)
+//! - [`discovery`] — locate installed screensaver plugins on disk
+//! - [`launcher`] — validate and spawn plugin binaries
+//! - [`plugin_session`] — load, tick, and render a plugin for presentation
+//! - [`toolkit`] — host queries (system info, theme, platform metadata)
+//! - [`trance_runner`] — fullscreen plugin runner for manual testing
 
 pub mod apps;
 pub mod cell_renderer;

@@ -3,6 +3,9 @@
 use std::fs;
 use std::path::PathBuf;
 
+use trance_runner::launcher::{is_allowed_saver, sanitize_saver_name};
+use trance_runner::plugin_meta;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct DaemonConfig {
     pub active_saver: Option<String>,
@@ -61,14 +64,17 @@ impl DaemonConfig {
                         match key {
                             "idle_timeout_mins" => {
                                 if let Ok(n) = val.parse::<u32>() {
-                                    config.idle_timeout_mins = n;
+                                    if (1..=240).contains(&n) {
+                                        config.idle_timeout_mins = n;
+                                    }
                                 }
                             }
                             "active_saver" => {
-                                if !val.is_empty() && val != "none" {
-                                    config.active_saver = Some(val.to_string());
-                                } else {
+                                if val.is_empty() || val == "none" {
                                     config.active_saver = None;
+                                } else if is_allowed_saver(val) {
+                                    config.active_saver =
+                                        sanitize_saver_name(val).map(|s| s.to_string());
                                 }
                             }
                             "idle_enabled" => {
@@ -87,7 +93,7 @@ impl DaemonConfig {
                                 }
                             }
                             "display_mode" => {
-                                if !val.is_empty() {
+                                if plugin_meta::parse_display_mode(val).is_some() {
                                     config.display_mode = val.to_string();
                                 }
                             }
@@ -95,7 +101,9 @@ impl DaemonConfig {
                                 if val.is_empty() || val.eq_ignore_ascii_case("null") {
                                     config.render_scale = None;
                                 } else if let Ok(scale) = val.parse::<f32>() {
-                                    config.render_scale = Some(scale.clamp(0.25, 1.0));
+                                    if scale.is_finite() {
+                                        config.render_scale = Some(scale.clamp(0.25, 1.0));
+                                    }
                                 }
                             }
                             _ => {}

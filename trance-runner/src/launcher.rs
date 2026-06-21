@@ -16,6 +16,13 @@ pub enum LaunchMode {
     Preview,
 }
 
+/// Whether `name` resolves to a built-in screensaver package.
+pub fn is_allowed_saver(name: &str) -> bool {
+    sanitize_saver_name(name)
+        .as_deref()
+        .is_some_and(|clean| ALLOWED_SAVERS.contains(&clean))
+}
+
 /// Reduce a raw name or path to a clean basename, if valid.
 pub fn sanitize_saver_name(raw: &str) -> Option<String> {
     let stem = Path::new(raw)
@@ -61,6 +68,27 @@ fn dev_plugin_dirs(clean: &str) -> Vec<PathBuf> {
     ]
 }
 
+/// True when `path` resolves under one of the trusted plugin directories.
+pub fn is_trusted_plugin_path(path: &Path, trusted_dirs: &[PathBuf]) -> bool {
+    let canonical = match std::fs::canonicalize(path) {
+        Ok(path) => path,
+        Err(_) => return false,
+    };
+    trusted_dirs.iter().any(|dir| {
+        std::fs::canonicalize(dir)
+            .ok()
+            .is_some_and(|canonical_dir| canonical.starts_with(&canonical_dir))
+    })
+}
+
+fn trusted_plugin_dirs(clean: &str, mode: &LaunchMode) -> Vec<PathBuf> {
+    let mut dirs = crate::discovery::get_screensaver_dirs();
+    if *mode == LaunchMode::Preview {
+        dirs.extend(dev_plugin_dirs(clean));
+    }
+    dirs
+}
+
 /// Resolve a saver name to a trusted plugin library path.
 pub fn resolve_saver_binary(name: &str, mode: &LaunchMode) -> std::io::Result<PathBuf> {
     let clean = sanitize_saver_name(name).ok_or_else(|| {
@@ -69,6 +97,13 @@ pub fn resolve_saver_binary(name: &str, mode: &LaunchMode) -> std::io::Result<Pa
             format!("unknown or invalid screensaver name: {name}"),
         )
     })?;
+
+    if !ALLOWED_SAVERS.contains(&clean.as_str()) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("screensaver '{clean}' is not in the trusted allowlist"),
+        ));
+    }
 
     let candidates = [
         format!("libscreensaver_{clean}.so"),
@@ -86,18 +121,23 @@ pub fn resolve_saver_binary(name: &str, mode: &LaunchMode) -> std::io::Result<Pa
         None
     };
 
-    // Preview prefers local cargo builds over the apt-installed plugin.
-    if *mode == LaunchMode::Preview {
-        for base in dev_plugin_dirs(&clean) {
-            if let Some(path) = find_in_dir(&base) {
+    let trusted_dirs = trusted_plugin_dirs(&clean, mode);
+    let dev_dirs = dev_plugin_dirs(&clean);
+    let search_order: Vec<&Path> = if *mode == LaunchMode::Preview {
+        dev_dirs
+            .iter()
+            .map(|p| p.as_path())
+            .chain(trusted_dirs.iter().map(|p| p.as_path()))
+            .collect()
+    } else {
+        trusted_dirs.iter().map(|p| p.as_path()).collect()
+    };
+
+    for base in search_order {
+        if let Some(path) = find_in_dir(base) {
+            if is_trusted_plugin_path(&path, &trusted_dirs) {
                 return Ok(path);
             }
-        }
-    }
-
-    for base in crate::discovery::get_screensaver_dirs() {
-        if let Some(path) = find_in_dir(&base) {
-            return Ok(path);
         }
     }
 

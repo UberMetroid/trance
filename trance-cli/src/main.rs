@@ -139,8 +139,9 @@ fn cmd_display_mode(client: &TranceClient, args: &[String]) -> Result<(), String
         Some("primary") => client.set_display_mode("primary").map_err(map_dbus),
         Some("mirror") => client.set_display_mode("mirror").map_err(map_dbus),
         Some("expand") => client.set_display_mode("expand").map_err(map_dbus),
+        Some("span") => client.set_display_mode("span").map_err(map_dbus),
         Some(value) => Err(format!(
-            "unknown display-mode: {value} (use primary, mirror, expand, status)"
+            "unknown display-mode: {value} (use primary, mirror, expand, span, status)"
         )),
     }
 }
@@ -214,7 +215,7 @@ fn print_usage() {
            stop                   Stop preview or idle presentation\n\
            gpu on | off | status  Toggle GPU upscaling\n\
            fps-overlay on|off|status  Toggle on-screen FPS overlay\n\
-           display-mode primary|mirror|expand|status  Multi-monitor layout\n\
+           display-mode primary|mirror|expand|span|status  Multi-monitor layout\n\
            render-scale <0.25-1.0>|default|status  Simulation grid density (zoom)\n"
     );
 }

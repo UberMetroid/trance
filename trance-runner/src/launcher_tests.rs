@@ -31,6 +31,14 @@ fn sanitize_rejects_bad_names() {
 }
 
 #[test]
+fn allowlist_blocks_unknown_savers() {
+    assert!(!is_allowed_saver("not-a-real-saver"));
+    assert!(!is_allowed_saver("passwd"));
+    assert!(is_allowed_saver("cosmos"));
+    assert!(resolve_saver_binary("evil-plugin", &LaunchMode::Daemon).is_err());
+}
+
+#[test]
 fn allowlist_is_complete() {
     assert_eq!(ALLOWED_SAVERS.len(), 7);
     assert!(ALLOWED_SAVERS.contains(&"beams"));
