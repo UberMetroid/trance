@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pub fn align_to(value: u32, alignment: u32) -> u32 {
-    ((value + alignment - 1) / alignment) * alignment
+    value.div_ceil(alignment) * alignment
 }
 
 pub fn bgra_to_rgba_into(

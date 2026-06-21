@@ -34,3 +34,14 @@ wayland-present = { path = "crates/wayland-present" }
 [workspace.lints.rust]
 unused_must_use = "warn"
 dead_code = "warn"
+
+[workspace.lints.clippy]
+collapsible_if = "allow"
+too_many_arguments = "allow"
+duplicate_mod = "allow"
+assign_op_pattern = "allow"
+type_complexity = "allow"
+single_char_add_str = "allow"
+manual_strip = "allow"
+module_inception = "allow"
+manual_is_multiple_of = "allow"

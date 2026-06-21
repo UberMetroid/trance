@@ -6,6 +6,7 @@ use super::pixel_format::{bgra_to_rgba_into, rgba_to_bgra_inplace};
 use super::types::{GpuUpscaler, Params};
 
 impl GpuUpscaler {
+    #[allow(clippy::too_many_arguments)]
     pub fn upscale_letterbox_into(
         &mut self,
         src: &[u8],
@@ -77,6 +78,7 @@ impl GpuUpscaler {
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn upscale_rect_into(
         &mut self,
         src: &[u8],

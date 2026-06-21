@@ -67,6 +67,7 @@ pub fn upscale_stretch_into(
 }
 
 /// Fast integer nearest-neighbor stretch (allocates output).
+#[allow(dead_code)]
 pub fn upscale_stretch(src: &[u8], src_w: u32, src_h: u32, dst_w: u32, dst_h: u32) -> Vec<u8> {
     let mut dst = vec![0u8; (dst_w * dst_h * 4) as usize];
     let mut cache = StretchCache::new();
@@ -117,6 +118,7 @@ pub fn upscale_letterbox_into(
     }
 }
 
+#[allow(dead_code)]
 pub fn upscale_letterbox(
     src: &[u8],
     src_w: u32,

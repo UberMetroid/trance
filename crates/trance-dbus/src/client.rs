@@ -128,30 +128,21 @@ fn parse_status(map: HashMap<String, OwnedValue>) -> zbus::Result<DaemonStatus> 
 }
 
 fn read_bool(map: &HashMap<String, OwnedValue>, key: &str) -> bool {
-    if let Some(value) = map.get(key) {
-        if let Ok(flag) = value.downcast_ref::<bool>() {
-            return flag;
-        }
-    }
-    false
+    map.get(key)
+        .and_then(|value| value.downcast_ref::<bool>().ok())
+        .unwrap_or(false)
 }
 
 fn read_u32(map: &HashMap<String, OwnedValue>, key: &str) -> u32 {
-    if let Some(value) = map.get(key) {
-        if let Ok(number) = value.downcast_ref::<u32>() {
-            return number;
-        }
-    }
-    0
+    map.get(key)
+        .and_then(|value| value.downcast_ref::<u32>().ok())
+        .unwrap_or(0)
 }
 
 fn read_string(map: &HashMap<String, OwnedValue>, key: &str) -> String {
-    if let Some(value) = map.get(key) {
-        if let Ok(text) = value.downcast_ref::<String>() {
-            return text.clone();
-        }
-    }
-    String::new()
+    map.get(key)
+        .and_then(|value| value.downcast_ref::<String>().ok())
+        .unwrap_or_default()
 }
 
 /// Returns whether the trance daemon is reachable on the session bus.
