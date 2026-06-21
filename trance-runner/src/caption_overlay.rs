@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::too_many_arguments)]
+
 use std::sync::OnceLock;
 
 use fontdue::Font;
@@ -16,11 +18,10 @@ static FONT: OnceLock<Option<Font>> = OnceLock::new();
 fn font() -> Option<&'static Font> {
     FONT.get_or_init(|| {
         for path in FONT_CANDIDATES {
-            if let Ok(bytes) = std::fs::read(path) {
-                if let Ok(font) = Font::from_bytes(bytes, fontdue::FontSettings::default()) {
+            if let Ok(bytes) = std::fs::read(path)
+                && let Ok(font) = Font::from_bytes(bytes, fontdue::FontSettings::default()) {
                     return Some(font);
                 }
-            }
         }
         None
     })

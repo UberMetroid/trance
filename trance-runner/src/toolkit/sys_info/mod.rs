@@ -46,11 +46,10 @@ fn get_system() -> std::sync::MutexGuard<'static, sysinfo::System> {
 pub fn get_system_info() -> SystemInfo {
     let cache_mutex = SYSTEM_INFO_CACHE.get_or_init(|| Mutex::new((None, Instant::now())));
     let mut cache = cache_mutex.lock().unwrap();
-    if let Some(ref val) = cache.0 {
-        if cache.1.elapsed() < Duration::from_secs(3) {
+    if let Some(ref val) = cache.0
+        && cache.1.elapsed() < Duration::from_secs(3) {
             return val.clone();
         }
-    }
     let val = get_system_info_raw();
     cache.0 = Some(val.clone());
     cache.1 = Instant::now();

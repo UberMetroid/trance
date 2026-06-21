@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::too_many_arguments)]
+
 use std::path::Path;
 use std::time::Duration;
 

@@ -13,11 +13,10 @@ type LogoCacheEntry = (String, Option<String>, Vec<String>);
 pub fn render_logo_block(text: &str, sub_text: Option<&str>) -> Vec<String> {
     static CACHE: std::sync::Mutex<Option<LogoCacheEntry>> = std::sync::Mutex::new(None);
     let mut lock = CACHE.lock().unwrap();
-    if let Some((cached_text, cached_sub, cached_val)) = &*lock {
-        if cached_text == text && cached_sub.as_deref() == sub_text {
+    if let Some((cached_text, cached_sub, cached_val)) = &*lock
+        && cached_text == text && cached_sub.as_deref() == sub_text {
             return cached_val.clone();
         }
-    }
 
     let chars: Vec<char> = text.chars().collect();
     let mut rows: Vec<String> = vec![String::new(); 5];

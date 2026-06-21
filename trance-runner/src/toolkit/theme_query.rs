@@ -24,11 +24,10 @@ static GLOBAL_THEME_CACHE: OnceLock<Mutex<CacheEntry>> = OnceLock::new();
 pub fn load_global_theme() -> (Option<(u8, u8, u8)>, Option<bool>) {
     let cache_mutex = GLOBAL_THEME_CACHE.get_or_init(|| Mutex::new((None, Instant::now())));
     let mut cache = cache_mutex.lock().unwrap();
-    if let Some(ref val) = cache.0 {
-        if cache.1.elapsed() < Duration::from_secs(1) {
+    if let Some(ref val) = cache.0
+        && cache.1.elapsed() < Duration::from_secs(1) {
             return *val;
         }
-    }
     let val = load_global_theme_raw();
     cache.0 = Some(val);
     cache.1 = Instant::now();
@@ -36,8 +35,8 @@ pub fn load_global_theme() -> (Option<(u8, u8, u8)>, Option<bool>) {
 }
 
 fn load_global_theme_raw() -> (Option<(u8, u8, u8)>, Option<bool>) {
-    if let Some(path) = get_global_theme_path() {
-        if let Ok(content) = std::fs::read_to_string(path) {
+    if let Some(path) = get_global_theme_path()
+        && let Ok(content) = std::fs::read_to_string(path) {
             let mut accent = None;
             let mut dark = None;
             for line in content.lines() {
@@ -72,6 +71,5 @@ fn load_global_theme_raw() -> (Option<(u8, u8, u8)>, Option<bool>) {
             }
             return (accent, dark);
         }
-    }
     (None, None)
 }

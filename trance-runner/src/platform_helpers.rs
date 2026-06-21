@@ -36,11 +36,10 @@ pub fn check_mouse_activity(_initial_pos: &mut Option<(i32, i32)>) -> bool {
 
 pub fn check_keypress() -> bool {
     use crossterm::event::{self, Event};
-    if let Ok(true) = event::poll(std::time::Duration::from_secs(0)) {
-        if let Ok(Event::Key(_)) = event::read() {
+    if let Ok(true) = event::poll(std::time::Duration::from_secs(0))
+        && let Ok(Event::Key(_)) = event::read() {
             return true;
         }
-    }
     false
 }
 
@@ -57,11 +56,9 @@ pub fn command_exists(cmd: &str) -> bool {
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .status()
-    {
-        if status.success() {
+        && status.success() {
             return true;
         }
-    }
     // Fallback: if the command can at least be started (even if it exits non-zero),
     // consider it present. (Used for "xterm" in fullscreen launch paths.)
     std::process::Command::new(cmd)

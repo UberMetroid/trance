@@ -6,21 +6,20 @@ use std::time::{Duration, Instant};
 
 use trance_api::MonitorCellBounds;
 
-static MONITOR_LAYOUT_CACHE: OnceLock<
-    Mutex<Option<(Vec<MonitorCellBounds>, (usize, usize), Instant)>>,
-> = OnceLock::new();
+type MonitorLayoutCacheEntry = (Vec<MonitorCellBounds>, (usize, usize), Instant);
+
+static MONITOR_LAYOUT_CACHE: OnceLock<Mutex<Option<MonitorLayoutCacheEntry>>> = OnceLock::new();
 
 pub fn get_monitor_layouts(cols: usize, rows: usize) -> Vec<MonitorCellBounds> {
     let cache_mutex = MONITOR_LAYOUT_CACHE.get_or_init(|| Mutex::new(None));
     let mut cache = cache_mutex.lock().unwrap();
-    if let Some((ref layouts, (cached_cols, cached_rows), last_query)) = *cache {
-        if cached_cols == cols
+    if let Some((ref layouts, (cached_cols, cached_rows), last_query)) = *cache
+        && cached_cols == cols
             && cached_rows == rows
             && last_query.elapsed() < Duration::from_secs(5)
         {
             return layouts.clone();
         }
-    }
 
     let mut computed_layouts = None;
     if let Some(xmonitors) = query_monitors_from_xrandr() {
@@ -109,12 +108,13 @@ pub fn is_secondary_monitor() -> bool {
     std::env::var("TRANCE_SECONDARY_MONITOR").is_ok()
 }
 
-pub fn query_monitors_from_xrandr() -> Option<Vec<(bool, u32, u32, i32, i32)>> {
-    if let Ok(exe) = std::env::current_exe() {
-        if exe.to_string_lossy().contains("/deps/") {
+type XrandrMonitorInfo = (bool, u32, u32, i32, i32);
+
+pub fn query_monitors_from_xrandr() -> Option<Vec<XrandrMonitorInfo>> {
+    if let Ok(exe) = std::env::current_exe()
+        && exe.to_string_lossy().contains("/deps/") {
             return None;
         }
-    }
     let output = std::process::Command::new("xrandr")
         .arg("--listmonitors")
         .output()

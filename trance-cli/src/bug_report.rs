@@ -17,7 +17,7 @@ pub fn handle_bug_report() -> Result<(), String> {
     let xdg_runtime = std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "not set".to_string());
     report.push_str(&format!("* **XDG_RUNTIME_DIR**: `{xdg_runtime}`\n"));
     let home = std::env::var("HOME").unwrap_or_else(|_| "/home/user".to_string());
-    report.push_str("\n");
+    report.push('\n');
 
     // Daemon & Service Status
     report.push_str("#### Service Status\n");

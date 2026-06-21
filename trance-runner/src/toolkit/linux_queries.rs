@@ -31,8 +31,8 @@ pub fn query_gpu_names() -> Vec<String> {
     if let Ok(entries) = std::fs::read_dir("/sys/class/drm") {
         for entry in entries.flatten() {
             let path = entry.path().join("device").join("uevent");
-            if path.exists() {
-                if let Ok(content) = std::fs::read_to_string(path) {
+            if path.exists()
+                && let Ok(content) = std::fs::read_to_string(path) {
                     for line in content.lines() {
                         if line.starts_with("DRIVER=") {
                             let driver = line.split('=').nth(1).unwrap_or("").to_string();
@@ -42,7 +42,6 @@ pub fn query_gpu_names() -> Vec<String> {
                         }
                     }
                 }
-            }
         }
     }
     gpus
@@ -59,13 +58,11 @@ pub fn query_all_monitors() -> Vec<String> {
     if let Ok(entries) = std::fs::read_dir("/sys/class/drm") {
         for entry in entries.flatten() {
             let modes_path = entry.path().join("modes");
-            if modes_path.exists() {
-                if let Ok(content) = std::fs::read_to_string(&modes_path) {
-                    if let Some(line) = content.lines().next() {
+            if modes_path.exists()
+                && let Ok(content) = std::fs::read_to_string(&modes_path)
+                    && let Some(line) = content.lines().next() {
                         monitors.push(format!("Display: {}", line));
                     }
-                }
-            }
         }
     }
     if !monitors.is_empty() {

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::too_many_arguments)]
+
 use std::sync::{OnceLock, RwLock};
 
 use trance_api::MonitorCellBounds;

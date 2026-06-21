@@ -63,8 +63,8 @@ pub fn run_doctor() -> Result<(), String> {
         std::env::temp_dir().join("trance-daemon.pid")
     };
     if pid_path.exists() {
-        if let Ok(pid_str) = fs::read_to_string(&pid_path) {
-            if let Ok(pid) = pid_str.trim().parse::<i32>() {
+        if let Ok(pid_str) = fs::read_to_string(&pid_path)
+            && let Ok(pid) = pid_str.trim().parse::<i32>() {
                 unsafe {
                     if libc::kill(pid, 0) == 0 {
                         println!(" [✔] Process Status: Daemon is running (PID {pid}) and responsive.");
@@ -75,7 +75,6 @@ pub fn run_doctor() -> Result<(), String> {
                     }
                 }
             }
-        }
     } else if dbus_ok {
         println!(" [!] Process Status: Connected to daemon via D-Bus, but PID file is missing.");
     } else {

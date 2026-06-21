@@ -23,11 +23,10 @@ pub struct Local76Config {
 
 impl Local76Config {
     pub fn get_config_path() -> Option<PathBuf> {
-        if let Ok(xdg_config) = std::env::var("XDG_CONFIG_HOME") {
-            if !xdg_config.is_empty() {
+        if let Ok(xdg_config) = std::env::var("XDG_CONFIG_HOME")
+            && !xdg_config.is_empty() {
                 return Some(PathBuf::from(xdg_config).join("local76").join("theme.yaml"));
             }
-        }
         let home = std::env::var("HOME").ok()?;
         Some(
             PathBuf::from(home)
@@ -48,8 +47,8 @@ impl Local76Config {
             show_fps_overlay: false,
         };
 
-        if let Some(path) = Self::get_config_path() {
-            if let Ok(content) = fs::read_to_string(&path) {
+        if let Some(path) = Self::get_config_path()
+            && let Ok(content) = fs::read_to_string(&path) {
                 for line in content.lines() {
                     let line = line.trim();
                     if line.is_empty() || line.starts_with('#') {
@@ -99,7 +98,6 @@ impl Local76Config {
                     }
                 }
             }
-        }
         config
     }
 

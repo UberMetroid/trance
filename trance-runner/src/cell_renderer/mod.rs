@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::too_many_arguments)]
+
 //! Rasterizes [`trance_api::TerminalCell`] grids into BGRA pixel buffers.
 
 mod pixels;

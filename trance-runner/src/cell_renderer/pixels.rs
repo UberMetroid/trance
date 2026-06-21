@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::too_many_arguments)]
+
 pub fn letterbox_into(
     content: &[u8],
     content_w: u32,
@@ -48,9 +50,9 @@ pub fn dim_rect(pixels: &mut [u8], width: u32, height: u32, x: usize, y: usize, 
         for col in x..x.saturating_add(w).min(width as usize) {
             let offset = pixel_offset(width, col, row);
             if offset + 2 < pixels.len() {
-                pixels[offset] = pixels[offset] / 2;
-                pixels[offset + 1] = pixels[offset + 1] / 2;
-                pixels[offset + 2] = pixels[offset + 2] / 2;
+                pixels[offset] /= 2;
+                pixels[offset + 1] /= 2;
+                pixels[offset + 2] /= 2;
             }
         }
     }

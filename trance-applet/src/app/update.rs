@@ -39,13 +39,12 @@ impl AppModel {
                         } else {
                             std::env::temp_dir().join("trance-daemon.pid")
                         };
-                        if let Ok(pid_str) = std::fs::read_to_string(&pid_path) {
-                            if let Ok(pid) = pid_str.trim().parse::<i32>() {
+                        if let Ok(pid_str) = std::fs::read_to_string(&pid_path)
+                            && let Ok(pid) = pid_str.trim().parse::<i32>() {
                                 unsafe {
                                     libc::kill(pid, libc::SIGTERM);
                                 }
                             }
-                        }
                     }
                 }
             }
@@ -155,11 +154,10 @@ impl AppModel {
                     }
                 });
                 let mut started_via_dbus = false;
-                if crate::daemon_client::is_running() {
-                    if crate::daemon_client::start_preview(&saver).is_ok() {
+                if crate::daemon_client::is_running()
+                    && crate::daemon_client::start_preview(&saver).is_ok() {
                         started_via_dbus = true;
                     }
-                }
                 if !started_via_dbus {
                     let _ = std::process::Command::new("trance-runner")
                         .args(["preview", &saver])

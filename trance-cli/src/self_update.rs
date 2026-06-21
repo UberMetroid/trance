@@ -16,10 +16,10 @@ pub fn handle_self_update() -> Result<(), String> {
             let mut candidate = None;
             for line in text.lines() {
                 let line = line.trim();
-                if line.starts_with("Installed:") {
-                    installed = Some(line["Installed:".len()..].trim().to_string());
-                } else if line.starts_with("Candidate:") {
-                    candidate = Some(line["Candidate:".len()..].trim().to_string());
+                if let Some(stripped) = line.strip_prefix("Installed:") {
+                    installed = Some(stripped.trim().to_string());
+                } else if let Some(stripped) = line.strip_prefix("Candidate:") {
+                    candidate = Some(stripped.trim().to_string());
                 }
             }
 

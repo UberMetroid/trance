@@ -143,11 +143,10 @@ pub fn resolve_saver_binary(name: &str, mode: &LaunchMode) -> std::io::Result<Pa
     };
 
     for base in search_order {
-        if let Some(path) = find_in_dir(base) {
-            if is_trusted_plugin_path(&path, &trusted_dirs) {
+        if let Some(path) = find_in_dir(base)
+            && is_trusted_plugin_path(&path, &trusted_dirs) {
                 return Ok(path);
             }
-        }
     }
 
     Err(std::io::Error::new(

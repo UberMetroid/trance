@@ -57,7 +57,7 @@ impl DaemonController {
     }
 
     pub fn reload_config_if_due(&self, tick_counter: u32) -> Option<u32> {
-        if tick_counter % 10 != 0 {
+        if !tick_counter.is_multiple_of(10) {
             return None;
         }
         let reloaded = crate::config::DaemonConfig::load();
