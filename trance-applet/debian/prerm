@@ -1,0 +1,22 @@
+#!/bin/sh
+# prerm script for trance-applet
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
+    echo "=========================================================="
+    echo "  Stopping Trance Desktop Applet Instances..."
+    echo "=========================================================="
+
+    if command -v loginctl >/dev/null && command -v runuser >/dev/null && command -v pkill >/dev/null; then
+        loginctl list-users --no-legend | while read -r uid user linger state; do
+            if [ -n "$user" ] && [ -n "$uid" ]; then
+                echo "-> Stopping applet process for: $user"
+                pkill -u "$user" -f trance-applet || true
+            fi
+        done
+    fi
+    echo "  Applet processes stopped successfully."
+    echo "=========================================================="
+fi
+
+exit 0
