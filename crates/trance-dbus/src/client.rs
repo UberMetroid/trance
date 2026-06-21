@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use zbus::zvariant::OwnedValue;
 
 use crate::status::DaemonStatus;
-use crate::{OBJECT_PATH, SERVICE_NAME};
+use crate::SERVICE_NAME;
 
 #[zbus::proxy(
     interface = "com.local76.Trance",
@@ -167,13 +167,13 @@ pub fn daemon_available() -> bool {
         Ok(connection) => connection,
         Err(_) => return false,
     };
-    connection
-        .call_method(
-            Some(SERVICE_NAME),
-            OBJECT_PATH,
-            Some("org.freedesktop.DBus.Peer"),
-            "Ping",
-            &(),
-        )
-        .is_ok()
+    let dbus = match zbus::blocking::fdo::DBusProxy::new(&connection) {
+        Ok(dbus) => dbus,
+        Err(_) => return false,
+    };
+    let name = match zbus::names::BusName::try_from(SERVICE_NAME) {
+        Ok(name) => name,
+        Err(_) => return false,
+    };
+    dbus.name_has_owner(name).unwrap_or(false)
 }
