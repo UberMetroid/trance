@@ -60,7 +60,6 @@ fn run(args: Vec<String>) -> Result<(), String> {
         "list" => cmd_list(&client),
         "preview" => cmd_preview(&client, &args[1..]),
         "stop" => client.stop_preview().map_err(map_dbus),
-        "gpu" => cmd_gpu(&client, &args[1..]),
         "fps-overlay" => cmd_fps_overlay(&client, &args[1..]),
         "render-scale" => cmd_render_scale(&client, &args[1..]),
         _ => {
@@ -177,21 +176,6 @@ fn cmd_render_scale(client: &TranceClient, args: &[String]) -> Result<(), String
     }
 }
 
-fn cmd_gpu(client: &TranceClient, args: &[String]) -> Result<(), String> {
-    match args.first().map(String::as_str) {
-        None | Some("status") => {
-            let status = client.get_status().map_err(map_dbus)?;
-            println!(
-                "gpu rendering: {}",
-                if status.gpu_enabled { "on" } else { "off" }
-            );
-            Ok(())
-        }
-        Some("on") => client.set_gpu_enabled(true).map_err(map_dbus),
-        Some("off") => client.set_gpu_enabled(false).map_err(map_dbus),
-        Some(value) => Err(format!("unknown gpu subcommand: {value} (use on, off, status)")),
-    }
-}
 
 fn display_saver(name: &str) -> String {
     if name.is_empty() {
@@ -217,7 +201,6 @@ fn print_usage() {
            saver list | list      List installed savers\n\
            preview <saver>        Preview a screensaver now\n\
            stop                   Stop preview or idle presentation\n\
-           gpu on | off | status  Toggle GPU upscaling\n\
            fps-overlay on|off|status  Toggle on-screen FPS overlay\n\
            render-scale <0.25-1.0>|default|status  Simulation grid density (zoom)\n\
            doctor                 Run system diagnostics\n\

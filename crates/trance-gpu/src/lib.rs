@@ -1,14 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-//! GPU upscaling for trance screensaver frames.
-//!
-//! Uses [wgpu](https://wgpu.rs/) (Vulkan or OpenGL) for cross-vendor support on Linux:
-//! AMD (RADV), Intel (ANV), and NVIDIA (proprietary or Nouveau drivers).
+//! CPU upscaling for trance screensaver frames.
 
 mod cpu;
-mod gpu;
-
-pub use gpu::FrameUpscaler;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode {
@@ -25,12 +19,9 @@ impl FilterMode {
     }
 }
 
-/// Whether GPU upscaling should be attempted (default: yes).
+/// Whether GPU upscaling should be attempted (always false since GPU upscaling is removed).
 pub fn gpu_enabled() -> bool {
-    !matches!(
-        std::env::var("TRANCE_GPU").as_deref(),
-        Ok("0") | Ok("false") | Ok("off")
-    )
+    false
 }
 
 /// Simulation grid scale factor in `(0, 1]`. Lower values render chunkier effects
@@ -78,5 +69,111 @@ pub fn target_fps(detected_refresh_hz: u32) -> f32 {
         detected as f32
     } else {
         detected.min(cap) as f32
+    }
+}
+
+pub use trance_api::GpuSpotlight;
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct GpuCell {
+    pub ch: u32,
+    pub fg: [u8; 4],
+    pub bg: [u8; 4],
+    pub bold: u32,
+}
+
+pub struct FrameUpscaler {
+    filter: FilterMode,
+    stretch_buf: Vec<u8>,
+    stretch_dims: (u32, u32, u32, u32),
+    stretch_cache: cpu::StretchCache,
+    letterbox_buf: Vec<u8>,
+    letterbox_dims: (u32, u32, u32, u32),
+}
+
+impl FrameUpscaler {
+    pub fn new(_prefer_gpu: bool, filter: FilterMode) -> Self {
+        Self {
+            filter,
+            stretch_buf: Vec::new(),
+            stretch_dims: (0, 0, 0, 0),
+            stretch_cache: cpu::StretchCache::new(),
+            letterbox_buf: Vec::new(),
+            letterbox_dims: (0, 0, 0, 0),
+        }
+    }
+
+    fn ensure_stretch_buf(&mut self, src_w: u32, src_h: u32, dst_w: u32, dst_h: u32) {
+        let dims = (src_w, src_h, dst_w, dst_h);
+        let needed = (dst_w * dst_h * 4) as usize;
+        if self.stretch_dims != dims || self.stretch_buf.len() != needed {
+            self.stretch_buf.resize(needed, 0);
+            self.stretch_dims = dims;
+        }
+    }
+
+    fn ensure_letterbox_buf(&mut self, src_w: u32, src_h: u32, dst_w: u32, dst_h: u32) {
+        let dims = (src_w, src_h, dst_w, dst_h);
+        let needed = (dst_w * dst_h * 4) as usize;
+        if self.letterbox_dims != dims || self.letterbox_buf.len() != needed {
+            self.letterbox_buf.resize(needed, 0);
+            self.letterbox_dims = dims;
+        }
+    }
+
+    pub fn using_gpu(&self) -> bool {
+        false
+    }
+
+    pub fn adapter_name(&self) -> Option<&str> {
+        None
+    }
+
+    pub fn upscale_letterbox_into(
+        &mut self,
+        src: &[u8],
+        src_w: u32,
+        src_h: u32,
+        dst_w: u32,
+        dst_h: u32,
+        out: &mut Vec<u8>,
+    ) {
+        self.ensure_letterbox_buf(src_w, src_h, dst_w, dst_h);
+        cpu::upscale_letterbox_into(
+            &mut self.letterbox_buf,
+            src,
+            src_w,
+            src_h,
+            dst_w,
+            dst_h,
+            self.filter,
+        );
+        out.resize(self.letterbox_buf.len(), 0);
+        out.copy_from_slice(&self.letterbox_buf);
+    }
+
+    /// Stretch source to fill the destination (fullscreen presentation path).
+    pub fn upscale_stretch_into(
+        &mut self,
+        src: &[u8],
+        src_w: u32,
+        src_h: u32,
+        dst_w: u32,
+        dst_h: u32,
+        out: &mut Vec<u8>,
+    ) {
+        self.ensure_stretch_buf(src_w, src_h, dst_w, dst_h);
+        cpu::upscale_stretch_into(
+            &mut self.stretch_buf,
+            src,
+            src_w,
+            src_h,
+            dst_w,
+            dst_h,
+            &mut self.stretch_cache,
+        );
+        out.resize(self.stretch_buf.len(), 0);
+        out.copy_from_slice(&self.stretch_buf);
     }
 }

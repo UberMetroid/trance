@@ -43,7 +43,7 @@ impl Local76Config {
             theme_idx: 0,
             active_saver: Some("beams".to_string()),
             idle_enabled: true,
-            gpu_enabled: true,
+            gpu_enabled: false,
             show_fps_overlay: false,
         };
 
@@ -84,9 +84,7 @@ impl Local76Config {
                                 }
                             }
                             "gpu_enabled" => {
-                                if let Ok(b) = val.parse::<bool>() {
-                                    config.gpu_enabled = b;
-                                }
+                                config.gpu_enabled = false;
                             }
                             "show_fps_overlay" => {
                                 if let Ok(b) = val.parse::<bool>() {
@@ -115,14 +113,13 @@ impl Local76Config {
                  theme_idx: {}\n\
                  active_saver: \"{}\"\n\
                  idle_enabled: {}\n\
-                 gpu_enabled: {}\n\
+                 gpu_enabled: false\n\
                  show_fps_overlay: {}\n",
                 self.accent_color,
                 self.idle_timeout_mins,
                 self.theme_idx,
                 active_str,
                 self.idle_enabled,
-                self.gpu_enabled,
                 self.show_fps_overlay
             );
             fs::write(&path, content)?;

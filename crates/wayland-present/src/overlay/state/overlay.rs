@@ -41,6 +41,10 @@ impl SessionState {
             output_id,
         );
 
+        let viewport = self.viewporter.as_ref().map(|vp| {
+            vp.get_viewport(&surface, &self.queue, ())
+        });
+
         layer_surface.set_anchor(
             zwlr_layer_surface_v1::Anchor::Top
                 | zwlr_layer_surface_v1::Anchor::Bottom
@@ -63,6 +67,7 @@ impl SessionState {
                 width: 0,
                 height: 0,
                 buffer: None,
+                viewport,
             },
         );
     }
@@ -85,6 +90,11 @@ impl SessionState {
             Self::render_dimensions(output_id, width, height, &self.output_mode_size);
         overlay.width = render_w;
         overlay.height = render_h;
+
+        if let Some(viewport) = &overlay.viewport {
+            viewport.set_destination(render_w as i32, render_h as i32);
+        }
+
         let refresh_rate_hz = self
             .output_refresh_hz
             .get(&output_id)
@@ -142,8 +152,6 @@ impl SessionState {
             return;
         };
 
-        overlay.width = width;
-        overlay.height = height;
         if super::super::buffer::ensure_frame_buffer(
             &mut overlay.buffer,
             shm,
@@ -153,6 +161,13 @@ impl SessionState {
             &pixels,
         ) {
             let buffer = overlay.buffer.as_ref().expect("frame buffer exists after ensure");
+            
+            let dst_w = if overlay.width > 0 { overlay.width } else { width };
+            let dst_h = if overlay.height > 0 { overlay.height } else { height };
+            if let Some(viewport) = &overlay.viewport {
+                viewport.set_destination(dst_w as i32, dst_h as i32);
+            }
+
             overlay.surface.attach(Some(&buffer.wl_buffer), 0, 0);
             overlay
                 .surface
@@ -163,6 +178,9 @@ impl SessionState {
 
     pub fn remove_overlay(&mut self, output_id: u32) {
         if let Some(overlay) = self.overlays.remove(&output_id) {
+            if let Some(viewport) = overlay.viewport {
+                viewport.destroy();
+            }
             overlay.layer_surface.destroy();
             overlay.surface.destroy();
         }

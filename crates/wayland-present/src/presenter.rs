@@ -16,6 +16,7 @@ pub struct OverlayPresenter {
     shutdown: Arc<AtomicBool>,
     outputs: OutputRegistry,
     is_alive: Arc<AtomicBool>,
+    supports_scaling: Arc<AtomicBool>,
 }
 
 impl OverlayPresenter {
@@ -31,6 +32,7 @@ impl OverlayPresenter {
         let shutdown = Arc::new(AtomicBool::new(false));
         let outputs = OutputRegistry::new();
         let is_alive = Arc::new(AtomicBool::new(true));
+        let supports_scaling = Arc::new(AtomicBool::new(false));
 
         spawn_event_thread(
             ready_tx,
@@ -39,6 +41,7 @@ impl OverlayPresenter {
             shutdown.clone(),
             outputs.clone(),
             is_alive.clone(),
+            supports_scaling.clone(),
         );
 
         match ready_rx.recv_timeout(Duration::from_secs(5)) {
@@ -48,6 +51,7 @@ impl OverlayPresenter {
                 shutdown,
                 outputs,
                 is_alive,
+                supports_scaling,
             }),
             _ => None,
         }
@@ -64,6 +68,11 @@ impl OverlayPresenter {
     /// Returns `true` if the Wayland presentation thread is still running.
     pub fn is_alive(&self) -> bool {
         self.is_alive.load(Ordering::SeqCst)
+    }
+
+    /// Returns `true` if the compositor supports wp_viewporter hardware scaling.
+    pub fn supports_scaling(&self) -> bool {
+        self.supports_scaling.load(Ordering::SeqCst)
     }
 
     pub fn output_layouts(&self) -> Vec<OutputLayout> {

@@ -145,14 +145,10 @@ impl TranceService {
 
     async fn set_gpu_enabled(
         &self,
-        enabled: bool,
+        _enabled: bool,
         #[zbus(header)] header: zbus::message::Header<'_>,
     ) -> zbus::fdo::Result<()> {
         self.authorize_control(&header).await?;
-        self.controller
-            .apply_command(DaemonCommand::SetGpuEnabled(enabled))
-            .map_err(zbus::fdo::Error::Failed)?;
-        self.sync_config_status();
         Ok(())
     }
 
@@ -218,7 +214,7 @@ impl TranceService {
             status.idle_enabled = config.idle_enabled;
             status.idle_timeout_mins = config.idle_timeout_mins;
             status.active_saver = config.active_saver.clone().unwrap_or_default();
-            status.gpu_enabled = config.gpu_enabled;
+            status.gpu_enabled = false;
             status.show_fps_overlay = config.show_fps_overlay;
             status.render_scale = config
                 .render_scale

@@ -25,7 +25,7 @@ pub use monitor::{
 };
 pub use palette::ScreenPalette;
 pub use rng::LcgRng;
-pub use screensaver::{Screensaver, ScreensaverInstance, ScreensaverState};
+pub use screensaver::{Screensaver, ScreensaverInstance, ScreensaverState, GpuSpotlight};
 pub use system_info::SystemInfo;
 pub use terminal_cell::TerminalCell;
 
@@ -33,10 +33,10 @@ pub use terminal_cell::TerminalCell;
 pub mod core {
     pub use crate::{
         hsl_to_rgb, lerp, percentage, rgb_to_hsl, LcgRng, Screensaver, ScreensaverState,
-        TerminalCell,
+        TerminalCell, GpuSpotlight,
     };
     pub mod screensaver {
-        pub use crate::{Screensaver, ScreensaverState};
+        pub use crate::{Screensaver, ScreensaverState, GpuSpotlight};
     }
     pub mod logo_block {
         pub use crate::logo_block::render_logo_block;

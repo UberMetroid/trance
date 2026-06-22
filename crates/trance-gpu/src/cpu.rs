@@ -49,18 +49,52 @@ pub fn upscale_stretch_into(
         return;
     }
 
-    cache.ensure(src_w, dst_w);
-    dst[..needed].fill(0);
+    if src_w == dst_w && src_h == dst_h {
+        let copy_len = needed.min(src.len());
+        dst[..copy_len].copy_from_slice(&src[..copy_len]);
+        if needed > copy_len {
+            dst[copy_len..needed].fill(0);
+        }
+        return;
+    }
 
-    for dy in 0..dst_h {
-        let sy = (dy as u64 * src_h as u64 / dst_h as u64) as u32;
-        let src_row = sy as usize * src_w as usize * 4;
-        let dst_row = dy as usize * dst_w as usize * 4;
-        for dx in 0..dst_w as usize {
-            let src_off = src_row + cache.x_map[dx] as usize * 4;
-            let dst_off = dst_row + dx * 4;
-            if src_off + 4 <= src.len() && dst_off + 4 <= dst.len() {
-                dst[dst_off..dst_off + 4].copy_from_slice(&src[src_off..src_off + 4]);
+    cache.ensure(src_w, dst_w);
+
+    match (
+        bytemuck::try_cast_slice::<u8, u32>(src),
+        bytemuck::try_cast_slice_mut::<u8, u32>(&mut dst[..needed]),
+    ) {
+        (Ok(src_u32), Ok(dst_u32)) => {
+            for dy in 0..dst_h {
+                let sy = (dy as u64 * src_h as u64 / dst_h as u64) as usize;
+                let dst_row_start = dy as usize * dst_w as usize;
+                let dst_row_end = dst_row_start + dst_w as usize;
+                let src_row_start = sy * src_w as usize;
+
+                if dst_row_end <= dst_u32.len() && src_row_start + src_w as usize <= src_u32.len() {
+                    let src_row_slice = &src_u32[src_row_start..src_row_start + src_w as usize];
+                    let dst_row_slice = &mut dst_u32[dst_row_start..dst_row_end];
+                    for (dx, val) in dst_row_slice.iter_mut().enumerate() {
+                        let sx = cache.x_map[dx] as usize;
+                        *val = src_row_slice[sx];
+                    }
+                }
+            }
+        }
+        _ => {
+            // Fallback unaligned byte-copy path
+            dst[..needed].fill(0);
+            for dy in 0..dst_h {
+                let sy = (dy as u64 * src_h as u64 / dst_h as u64) as u32;
+                let src_row = sy as usize * src_w as usize * 4;
+                let dst_row = dy as usize * dst_w as usize * 4;
+                for dx in 0..dst_w as usize {
+                    let src_off = src_row + cache.x_map[dx] as usize * 4;
+                    let dst_off = dst_row + dx * 4;
+                    if src_off + 4 <= src.len() && dst_off + 4 <= dst.len() {
+                        dst[dst_off..dst_off + 4].copy_from_slice(&src[src_off..src_off + 4]);
+                    }
+                }
             }
         }
     }

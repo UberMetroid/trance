@@ -24,3 +24,34 @@ pub use output::OutputLayout;
 pub use presenter::OverlayPresenter;
 
 // Presenter commands are processed on a dedicated Wayland thread.
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_availability_and_fallback() {
+        let backup = std::env::var("WAYLAND_DISPLAY").ok();
+        
+        unsafe {
+            std::env::remove_var("WAYLAND_DISPLAY");
+        }
+        assert!(!OverlayPresenter::is_available());
+        assert!(OverlayPresenter::new().is_none());
+        
+        unsafe {
+            std::env::set_var("WAYLAND_DISPLAY", "wayland-mock-test-0");
+        }
+        assert!(OverlayPresenter::is_available());
+        
+        if let Some(val) = backup {
+            unsafe {
+                std::env::set_var("WAYLAND_DISPLAY", val);
+            }
+        } else {
+            unsafe {
+                std::env::remove_var("WAYLAND_DISPLAY");
+            }
+        }
+    }
+}

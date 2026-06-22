@@ -61,15 +61,6 @@ impl AppModel {
                     let _ = self.local_config.save();
                 }
             }
-            Message::ToggleGpuEnabled(toggled) => {
-                self.gpu_enabled = toggled;
-                if crate::daemon_client::is_running() {
-                    let _ = crate::daemon_client::set_gpu_enabled(toggled);
-                } else {
-                    self.local_config.gpu_enabled = toggled;
-                    let _ = self.local_config.save();
-                }
-            }
             Message::ToggleFpsOverlay(toggled) => {
                 self.show_fps_overlay = toggled;
                 if crate::daemon_client::is_running() {
@@ -204,7 +195,7 @@ impl AppModel {
             local_config: crate::config::Local76Config::load(),
             screensavers: trance_runner::discovery::detect_screensavers(),
             daemon_running: false,
-            gpu_enabled: true,
+            gpu_enabled: false,
             show_fps_overlay: false,
             popup: None,
         };

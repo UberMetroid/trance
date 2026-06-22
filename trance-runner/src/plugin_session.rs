@@ -37,8 +37,10 @@ pub struct PluginSession {
     pixel_buf: Vec<u8>,
     physics_accumulator: Duration,
     physics_duration: Duration,
+    time_elapsed: Duration,
     simulation_cols: usize,
     simulation_rows: usize,
+    hardware_scaling: bool,
 }
 
 impl PluginSession {
@@ -68,12 +70,18 @@ impl PluginSession {
         let render_scale = resolve_render_scale(use_gpu, render_scale);
         let upscaler = FrameUpscaler::new(use_gpu, FilterMode::from_env());
         if upscaler.using_gpu() {
+            unsafe {
+                std::env::set_var("TRANCE_GPU_ACTIVE", "1");
+            }
             println!(
                 "trance-runner: GPU upscale enabled (render scale {:.0}%, adapter: {})",
                 render_scale * 100.0,
                 upscaler.adapter_name().unwrap_or("unknown")
             );
         } else {
+            unsafe {
+                std::env::remove_var("TRANCE_GPU_ACTIVE");
+            }
             println!(
                 "trance-runner: CPU upscale (render scale {:.0}%)",
                 render_scale * 100.0
@@ -84,10 +92,10 @@ impl PluginSession {
             let lib = Library::new(path).map_err(|error| error.to_string())?;
             let create_fn: libloading::Symbol<unsafe extern "C" fn() -> *mut ScreensaverInstance> =
                 lib.get(b"create_screensaver")
-                    .map_err(|error| error.to_string())?;
+                   .map_err(|error| error.to_string())?;
             let destroy_fn: libloading::Symbol<unsafe extern "C" fn(*mut ScreensaverInstance)> =
                 lib.get(b"destroy_screensaver")
-                    .map_err(|error| error.to_string())?;
+                   .map_err(|error| error.to_string())?;
 
             let raw_ptr = create_fn();
             if raw_ptr.is_null() {
@@ -110,8 +118,10 @@ impl PluginSession {
                 pixel_buf: Vec::new(),
                 physics_accumulator: Duration::ZERO,
                 physics_duration: Duration::from_secs_f32(1.0 / 120.0),
+                time_elapsed: Duration::ZERO,
                 simulation_cols: 0,
                 simulation_rows: 0,
+                hardware_scaling: false,
             })
         }
     }
@@ -119,6 +129,18 @@ impl PluginSession {
     pub fn render_scale(&self) -> f32 { self.render_scale }
 
     pub fn using_gpu_upscale(&self) -> bool { self.upscaler.using_gpu() }
+
+    pub fn set_hardware_scaling(&mut self, enabled: bool) {
+        self.hardware_scaling = enabled;
+    }
+
+    pub fn content_width(&self, cols: usize) -> u32 {
+        self.renderer.content_width(cols)
+    }
+
+    pub fn content_height(&self, rows: usize) -> u32 {
+        self.renderer.content_height(rows)
+    }
 
     pub fn grid_for_pixels(&self, width: u32, height: u32) -> (usize, usize) {
         self.renderer.grid_for_pixels_scaled(width, height, self.render_scale)
@@ -138,6 +160,7 @@ impl PluginSession {
 
     pub fn tick(&mut self, frame_dt: Duration) {
         self.plugin.saver_mut().update_frame_time(frame_dt);
+        self.time_elapsed += frame_dt;
 
         self.physics_accumulator += frame_dt;
         if self.physics_accumulator > Duration::from_millis(100) {
@@ -221,6 +244,21 @@ impl PluginSession {
         height: u32,
         scanlines: bool,
     ) {
+        if self.hardware_scaling && !self.using_gpu_upscale() {
+            self.renderer.render_content_viewport_into(
+                &self.grid,
+                grid_cols,
+                col_start,
+                row_start,
+                cols,
+                rows,
+                scanlines,
+                &mut self.pixel_buf,
+            );
+            return;
+        }
+
+
         let content_w = self.renderer.content_width(cols);
         let content_h = self.renderer.content_height(rows);
         self.renderer.render_content_viewport_into(

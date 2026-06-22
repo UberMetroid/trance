@@ -56,6 +56,9 @@ impl SessionState {
         self.output_registry.clear();
 
         for (_, overlay) in self.overlays.drain() {
+            if let Some(viewport) = overlay.viewport {
+                viewport.destroy();
+            }
             overlay.layer_surface.destroy();
             overlay.surface.destroy();
         }

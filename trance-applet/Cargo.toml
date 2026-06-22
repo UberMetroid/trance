@@ -1,6 +1,6 @@
 [package]
 name = "trance-applet"
-version = "0.2.8"
+version = "0.3.1"
 edition = "2024"
 license = "MIT"
 description = "COSMIC Desktop panel applet for the trance screensavers"
@@ -65,7 +65,7 @@ assets = [
 
 [package.metadata.generate-rpm]
 name = "trance-applet"
-version = "0.2.8"
+version = "0.3.1"
 release = "1"
 arch = "x86_64"
 summary = "COSMIC Desktop panel applet for the trance screensavers"

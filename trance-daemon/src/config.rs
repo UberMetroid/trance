@@ -22,7 +22,7 @@ impl Default for DaemonConfig {
             active_saver: Some("beams".to_string()),
             idle_enabled: true,
             idle_timeout_mins: 5,
-            gpu_enabled: true,
+            gpu_enabled: false,
             show_fps_overlay: false,
             render_scale: None,
         }
@@ -74,9 +74,7 @@ impl DaemonConfig {
                             }
                         }
                         "gpu_enabled" => {
-                            if let Ok(b) = val.parse::<bool>() {
-                                config.gpu_enabled = b;
-                            }
+                            config.gpu_enabled = false;
                         }
                         "show_fps_overlay" => {
                             if let Ok(b) = val.parse::<bool>() {
@@ -114,13 +112,12 @@ impl DaemonConfig {
              theme_idx: 0\n\
              active_saver: \"{}\"\n\
              idle_enabled: {}\n\
-             gpu_enabled: {}\n\
+             gpu_enabled: false\n\
              show_fps_overlay: {}\n\
              render_scale: {}\n",
             self.idle_timeout_mins,
             active_str,
             self.idle_enabled,
-            self.gpu_enabled,
             self.show_fps_overlay,
             self.render_scale
                 .map(|s| s.to_string())

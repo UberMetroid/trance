@@ -13,6 +13,10 @@ use wayland_protocols_wlr::layer_shell::v1::client::{
     zwlr_layer_shell_v1, zwlr_layer_surface_v1,
 };
 
+use wayland_protocols::wp::viewporter::client::{
+    wp_viewport, wp_viewporter,
+};
+
 use crate::output::OutputRegistry;
 
 use super::super::buffer::MappedBuffer;
@@ -28,6 +32,7 @@ pub struct MonitorOverlay {
     pub width: u32,
     pub height: u32,
     pub buffer: Option<MappedBuffer>,
+    pub viewport: Option<wp_viewport::WpViewport>,
 }
 
 /// Mutable Wayland session state owned by the presenter thread.
@@ -35,6 +40,7 @@ pub struct SessionState {
     pub compositor: Option<wl_compositor::WlCompositor>,
     pub shm: Option<wl_shm::WlShm>,
     pub layer_shell: Option<zwlr_layer_shell_v1::ZwlrLayerShellV1>,
+    pub viewporter: Option<wp_viewporter::WpViewporter>,
     pub seat: Option<wl_seat::WlSeat>,
     pub pointer: Option<wl_pointer::WlPointer>,
     pub pointer_serial: u32,

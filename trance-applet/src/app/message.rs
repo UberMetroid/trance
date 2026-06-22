@@ -15,7 +15,6 @@ pub enum Message {
     ToggleIdleEnabled(bool),
     ActiveSaverSelected(String),
     ToggleDaemon(bool),
-    ToggleGpuEnabled(bool),
     ToggleFpsOverlay(bool),
     DecreaseTimeout,
     IncreaseTimeout,

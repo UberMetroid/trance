@@ -21,7 +21,6 @@ pub enum DaemonCommand {
     Disable,
     SetTimeout(u32),
     SetSaver(Option<String>),
-    SetGpuEnabled(bool),
     SetShowFpsOverlay(bool),
     SetRenderScale(Option<f32>),
     Preview(String),
@@ -52,7 +51,7 @@ impl DaemonController {
                 .active_saver
                 .clone()
                 .unwrap_or_default(),
-            gpu_enabled: initial_config.gpu_enabled,
+            gpu_enabled: false,
             show_fps_overlay: initial_config.show_fps_overlay,
             render_scale: initial_config
                 .render_scale

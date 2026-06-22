@@ -2,6 +2,19 @@ use std::time::Duration;
 
 use crate::terminal_cell::TerminalCell;
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct GpuSpotlight {
+    pub origin_x_ratio: f32,
+    pub color_r: f32,
+    pub color_g: f32,
+    pub color_b: f32,
+    pub angle: f32,
+    pub spread: f32,
+    pub speed: f32,
+    pub _pad: f32,
+}
+
 pub trait Screensaver: ScreensaverState {
     fn init(&mut self, _cols: usize, _rows: usize) {}
     fn update(&mut self, dt: Duration, cols: usize, rows: usize);
@@ -9,6 +22,9 @@ pub trait Screensaver: ScreensaverState {
     fn draw(&self, grid: &mut [TerminalCell], cols: usize, rows: usize);
     fn has_scanlines(&self) -> bool {
         false
+    }
+    fn spotlights(&self) -> &[GpuSpotlight] {
+        &[]
     }
 }
 

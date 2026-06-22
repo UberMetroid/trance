@@ -30,6 +30,12 @@ pub fn run_frame_loop(
     fps_report: &mut Instant,
     achieved_fps: &mut f32,
 ) -> Result<(), String> {
+    let use_hw_scaling = presenter.supports_scaling() && !session.using_gpu_upscale();
+    session.set_hardware_scaling(use_hw_scaling);
+    if use_hw_scaling {
+        tracing::info!("wayland-present: hardware scaling enabled via wp_viewporter");
+    }
+
     while !stop.load(Ordering::Relaxed) && presenter.is_visible() {
         let frame_start = Instant::now();
         let frame_dt = frame_start.saturating_duration_since(*last_frame);
@@ -51,6 +57,13 @@ pub fn run_frame_loop(
             );
             let col_w = bounds.end_col.saturating_sub(bounds.start_col).max(1);
             let row_h = bounds.end_row.saturating_sub(bounds.start_row).max(1);
+
+            let (target_w, target_h) = if use_hw_scaling {
+                (session.content_width(col_w), session.content_height(row_h))
+            } else {
+                (layout.width, layout.height)
+            };
+
             let mut pixels = session.raster_viewport(
                 bounds.start_col,
                 bounds.start_row,
@@ -58,19 +71,19 @@ pub fn run_frame_loop(
                 row_h,
                 virtual_cols,
                 virtual_rows,
-                layout.width,
-                layout.height,
+                target_w,
+                target_h,
                 scanlines,
             );
             maybe_draw_overlays(
                 &mut pixels,
-                layout.width,
-                layout.height,
+                target_w,
+                target_h,
                 layout.id == primary.id,
                 options.show_fps_overlay,
                 *achieved_fps,
             );
-            presenter.submit_frame(layout.id, layout.width, layout.height, pixels);
+            presenter.submit_frame(layout.id, target_w, target_h, pixels);
         }
 
         *frame_counter += 1;

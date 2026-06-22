@@ -11,7 +11,15 @@ if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
     if command -v loginctl >/dev/null && command -v systemctl >/dev/null; then
         loginctl list-users --no-legend | while read -r uid user linger state; do
             if [ -n "$user" ]; then
-                echo "-> Stopping service for: $user"
+                echo "-> Stopping service for: $user (UID: $uid)"
+                # Try runuser first (does not require systemd-machined)
+                if command -v runuser >/dev/null; then
+                    if runuser -u "$user" -- env XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" systemctl --user stop trance-daemon.service || true; then
+                        echo "-> Service stopped successfully for $user via runuser"
+                        continue
+                    fi
+                fi
+                # Fallback to --machine machine-control if runuser is unavailable or fails
                 systemctl --user --machine="$user@" stop trance-daemon.service || true
             fi
         done

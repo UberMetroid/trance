@@ -16,7 +16,7 @@ impl AppModel {
                 } else {
                     Some(status.active_saver)
                 };
-                self.gpu_enabled = status.gpu_enabled;
+                self.gpu_enabled = false;
                 self.show_fps_overlay = status.show_fps_overlay;
             }
             if let Ok(savers) = crate::daemon_client::list_savers() {
@@ -25,7 +25,7 @@ impl AppModel {
         } else {
             self.local_config = Local76Config::load();
             self.screensavers = trance_runner::discovery::detect_screensavers();
-            self.gpu_enabled = self.local_config.gpu_enabled;
+            self.gpu_enabled = false;
             self.show_fps_overlay = self.local_config.show_fps_overlay;
         }
     }

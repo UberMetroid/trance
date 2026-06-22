@@ -34,13 +34,6 @@ pub fn set_active_saver(name: Option<&str>) -> Result<(), String> {
         .map_err(|error| error.to_string())
 }
 
-pub fn set_gpu_enabled(enabled: bool) -> Result<(), String> {
-    TranceClient::connect()
-        .map_err(|error| error.to_string())?
-        .set_gpu_enabled(enabled)
-        .map_err(|error| error.to_string())
-}
-
 pub fn set_show_fps_overlay(enabled: bool) -> Result<(), String> {
     TranceClient::connect()
         .map_err(|error| error.to_string())?

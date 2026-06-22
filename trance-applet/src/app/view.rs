@@ -90,10 +90,6 @@ impl AppModel {
             ))
             .add(widget::settings::item("Idle Timeout", timeout_adjuster))
             .add(widget::settings::item(
-                "GPU Upscaling",
-                widget::toggler(self.gpu_enabled).on_toggle(Message::ToggleGpuEnabled),
-            ))
-            .add(widget::settings::item(
                 "FPS Overlay",
                 widget::toggler(self.show_fps_overlay).on_toggle(Message::ToggleFpsOverlay),
             ))

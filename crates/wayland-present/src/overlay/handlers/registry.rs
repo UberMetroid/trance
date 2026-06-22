@@ -37,6 +37,9 @@ impl Dispatch<wl_registry::WlRegistry, ()> for SessionState {
             "zwlr_layer_shell_v1" => {
                 state.layer_shell = Some(registry.bind(name, version.min(4), queue, ()));
             }
+            "wp_viewporter" => {
+                state.viewporter = Some(registry.bind(name, version.min(1), queue, ()));
+            }
             "wl_output" => {
                 let output = registry.bind::<wl_output::WlOutput, _, _>(name, version.min(4), queue, name);
                 state.outputs.push(OutputTarget { id: name, output });
@@ -93,5 +96,29 @@ impl Dispatch<wl_output::WlOutput, u32> for SessionState {
                 }
             }
         }
+    }
+}
+
+impl Dispatch<wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter, ()> for SessionState {
+    fn event(
+        _: &mut Self,
+        _: &wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter,
+        _: wayland_protocols::wp::viewporter::client::wp_viewporter::Event,
+        _: &(),
+        _: &Connection,
+        _: &QueueHandle<Self>,
+    ) {
+    }
+}
+
+impl Dispatch<wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport, ()> for SessionState {
+    fn event(
+        _: &mut Self,
+        _: &wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport,
+        _: wayland_protocols::wp::viewporter::client::wp_viewport::Event,
+        _: &(),
+        _: &Connection,
+        _: &QueueHandle<Self>,
+    ) {
     }
 }

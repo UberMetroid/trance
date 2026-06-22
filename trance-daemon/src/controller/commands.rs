@@ -44,13 +44,7 @@ impl DaemonController {
                 self.mark_dirty();
                 Ok(())
             }
-            DaemonCommand::SetGpuEnabled(enabled) => {
-                let mut config = self.config.lock().unwrap();
-                config.gpu_enabled = enabled;
-                config.save().map_err(|error| error.to_string())?;
-                self.mark_dirty();
-                Ok(())
-            }
+
             DaemonCommand::SetShowFpsOverlay(enabled) => {
                 let mut config = self.config.lock().unwrap();
                 config.show_fps_overlay = enabled;

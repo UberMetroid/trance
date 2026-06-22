@@ -14,11 +14,10 @@ pub fn run_interactive(client: &TranceClient) -> Result<(), String> {
         println!(" 2. Set Idle Timeout       (Current: {} mins)", status.idle_timeout_mins);
         println!(" 3. Select Active Saver    (Current: {})", if status.active_saver.is_empty() { "random" } else { &status.active_saver });
         println!(" 4. Preview a Screensaver");
-        println!(" 5. Toggle GPU Upscaling   (Current: {})", if status.gpu_enabled { "ON" } else { "OFF" });
-        println!(" 6. Toggle FPS Overlay     (Current: {})", if status.show_fps_overlay { "ON" } else { "OFF" });
-        println!(" 7. Stop Current Preview / Presentation");
-        println!(" 8. Exit");
-        print!("\nSelect an option (1-8): ");
+        println!(" 5. Toggle FPS Overlay     (Current: {})", if status.show_fps_overlay { "ON" } else { "OFF" });
+        println!(" 6. Stop Current Preview / Presentation");
+        println!(" 7. Exit");
+        print!("\nSelect an option (1-7): ");
         io::stdout().flush().map_err(|e| e.to_string())?;
 
         let mut choice = String::new();
@@ -94,22 +93,18 @@ pub fn run_interactive(client: &TranceClient) -> Result<(), String> {
                 }
             }
             "5" => {
-                client.set_gpu_enabled(!status.gpu_enabled).map_err(|e| e.to_string())?;
-                println!("GPU upscaling toggled to {}.", if !status.gpu_enabled { "ON" } else { "OFF" });
-            }
-            "6" => {
                 client.set_show_fps_overlay(!status.show_fps_overlay).map_err(|e| e.to_string())?;
                 println!("FPS overlay toggled to {}.", if !status.show_fps_overlay { "ON" } else { "OFF" });
             }
-            "7" => {
+            "6" => {
                 client.stop_preview().map_err(|e| e.to_string())?;
                 println!("Presentation stopped.");
             }
-            "8" => {
+            "7" => {
                 println!("Exiting control panel.");
                 break;
             }
-            _ => println!("Invalid selection. Please enter a number 1-8."),
+            _ => println!("Invalid selection. Please enter a number 1-7."),
         }
     }
     Ok(())

@@ -34,9 +34,10 @@ pub fn spawn_event_thread(
     shutdown: Arc<AtomicBool>,
     outputs: OutputRegistry,
     is_alive: Arc<AtomicBool>,
+    supports_scaling: Arc<AtomicBool>,
 ) {
     thread::spawn(move || {
-        if let Err(message) = run_event_loop(ready_tx, command_rx, visible, shutdown, outputs) {
+        if let Err(message) = run_event_loop(ready_tx, command_rx, visible, shutdown, outputs, supports_scaling) {
             eprintln!("wayland-present: {message}");
         }
         is_alive.store(false, Ordering::SeqCst);
@@ -49,6 +50,7 @@ fn run_event_loop(
     visible: Arc<AtomicBool>,
     shutdown: Arc<AtomicBool>,
     outputs: OutputRegistry,
+    supports_scaling: Arc<AtomicBool>,
 ) -> Result<(), &'static str> {
     let connection = Connection::connect_to_env().map_err(|_| "failed to connect to Wayland")?;
 
@@ -60,6 +62,7 @@ fn run_event_loop(
         compositor: None,
         shm: None,
         layer_shell: None,
+        viewporter: None,
         seat: None,
         pointer: None,
         pointer_serial: 0,
@@ -79,6 +82,10 @@ fn run_event_loop(
     event_queue
         .roundtrip(&mut state)
         .map_err(|_| "initial registry roundtrip failed")?;
+
+    if state.viewporter.is_some() {
+        supports_scaling.store(true, Ordering::SeqCst);
+    }
 
     if state.layer_shell.is_none() {
         let _ = ready_tx.send(Err("compositor does not expose zwlr_layer_shell_v1"));
