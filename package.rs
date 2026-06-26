@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Compiling release binaries...");
     run_cmd(Command::new("cargo").args(["build", "--release"]))?;
 
-    let apt_pool = Path::new("../apt/pool/main");
+    let apt_pool = Path::new("../packages/apt/pool/main");
 
     for crate_name in CRATES {
         println!("------------------------------------------");
@@ -92,7 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Built: {:?}", src_path.file_name().unwrap());
             let dest_path = apt_pool.join(src_path.file_name().unwrap());
             fs::copy(&src_path, &dest_path)?;
-            println!("Copied to apt repository pool/main/");
+            println!("Copied to apt repository packages/apt/pool/main/");
         } else {
             println!("Warning: Debian package not found for {} (searched for: {}).", crate_name, pkg_name);
         }
@@ -104,9 +104,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // Compile and execute apt/update.rs on the fly using stable rustc
     println!("Compiling update.rs...");
-    run_cmd(Command::new("rustc").args(["../apt/update.rs", "-o", "../apt/update_runner"]))?;
-    run_cmd(Command::new("../apt/update_runner").current_dir("../apt"))?;
-    let _ = fs::remove_file("../apt/update_runner");
+    run_cmd(Command::new("rustc").args(["../packages/apt/update.rs", "-o", "../packages/apt/update_runner"]))?;
+    run_cmd(Command::new("../packages/apt/update_runner").current_dir("../packages/apt"))?;
+    let _ = fs::remove_file("../packages/apt/update_runner");
 
     println!("==========================================");
     println!("Trance build and package sync complete!");
@@ -120,10 +120,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if response == "y" || response == "yes" {
         let version = get_version()?;
-        println!("Staging and committing packages in apt...");
-        run_cmd(Command::new("git").args(["add", "."]).current_dir("../apt"))?;
-        run_cmd(Command::new("git").args(["commit", "-m", &format!("Release trance v{}", version)]).current_dir("../apt"))?;
-        run_cmd(Command::new("git").args(["push", "origin", "main"]).current_dir("../apt"))?;
+        println!("Staging and committing packages in packages repository...");
+        run_cmd(Command::new("git").args(["add", "."]).current_dir("../packages"))?;
+        run_cmd(Command::new("git").args(["commit", "-m", &format!("Release trance v{}", version)]).current_dir("../packages"))?;
+        run_cmd(Command::new("git").args(["push", "origin", "main"]).current_dir("../packages"))?;
         println!("Push complete.");
     }
 

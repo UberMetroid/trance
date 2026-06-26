@@ -37,7 +37,7 @@ pub fn handle_self_update() -> Result<(), String> {
                 }
                 _ => {
                     println!(" [!] Could not determine installed package policy for 'trance'.");
-                    println!("     -> Note: Ensure the local76 APT repository is registered.");
+                    println!("     -> Note: Ensure the UberMetroid APT repository is registered.");
                 }
             }
         }
