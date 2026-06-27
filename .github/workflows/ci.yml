@@ -49,6 +49,27 @@ jobs:
       - name: Run Clippy (Deny Warnings)
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+
+  deny:
+    name: cargo-deny license & advisory audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-deny
+        run: cargo install --locked cargo-deny
+
+      - name: Run cargo-deny
+        run: cargo deny check
   test:
     name: Build & Test
     runs-on: ubuntu-latest
