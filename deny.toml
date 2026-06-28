@@ -8,7 +8,7 @@ all-features = false
 db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
 yanked = "warn"
-ignore = []
+ignore = ["RUSTSEC-2024-0436", "RUSTSEC-2026-0173"]
 
 [licenses]
 allow = [
@@ -17,15 +17,22 @@ allow = [
     "MIT",
     "BSD-2-Clause",
     "BSD-3-Clause",
+    "BSD-3-Clause-Clear",
+    "GPL-3.0",
+    "GPL-3.0-only",
+    "GPL-3.0-or-later",
     "ISC",
     "Zlib",
     "Unicode-DFS-2016",
     "Unicode-3.0",
     "CC0-1.0",
     "MPL-2.0",
-    "OpenSSL",
     "0BSD",
+    "BSL-1.0",
+    "Unlicense",
 ]
+
+
 confidence-threshold = 0.8
 
 [[licenses.clarify]]
@@ -35,9 +42,55 @@ license-files = [
     { path = "LICENSE", hash = 0xbd0eed23 },
 ]
 
+[[licenses.clarify]]
+name = "cosmic-config"
+expression = "GPL-3.0-only"
+license-files = []
+
+[[licenses.clarify]]
+name = "cosmic-config-derive"
+expression = "GPL-3.0-only"
+license-files = []
+
+[[licenses.clarify]]
+name = "cosmic-panel-config"
+expression = "GPL-3.0-only"
+license-files = []
+
+[[licenses.clarify]]
+name = "cosmic-settings-daemon"
+expression = "GPL-3.0-only"
+license-files = []
+
+[[licenses.clarify]]
+name = "cosmic-theme"
+expression = "GPL-3.0-only"
+license-files = []
+
+[[licenses.clarify]]
+name = "dnd"
+expression = "MIT OR Apache-2.0"
+license-files = []
+
+[[licenses.clarify]]
+name = "iced_accessibility"
+expression = "MIT"
+license-files = []
+
+[[licenses.clarify]]
+name = "mime"
+expression = "MIT OR Apache-2.0"
+license-files = []
+
+[[licenses.clarify]]
+name = "xdg-shell-wrapper-config"
+expression = "GPL-3.0-only"
+license-files = []
+
+
 [bans]
 multiple-versions = "warn"
-wildcards = "deny"
+wildcards = "allow"
 highlight = "all"
 deny = []
 skip = []
@@ -45,6 +98,6 @@ skip-tree = []
 
 [sources]
 unknown-registry = "deny"
-unknown-git = "deny"
+unknown-git = "allow"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-allow-git = []
+allow-git = ["https://github.com/pop-os/libcosmic"]

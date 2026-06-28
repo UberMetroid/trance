@@ -4973,8 +4973,8 @@ dependencies = [
  "tracing-subscriber",
  "trance-api",
  "trance-dbus",
- "trance-gpu",
  "trance-runner",
+ "trance-upscaler",
  "wayland-idle",
  "wayland-present",
  "zbus",
@@ -4985,14 +4985,6 @@ name = "trance-dbus"
 version = "0.3.4"
 dependencies = [
  "zbus",
-]
-
-[[package]]
-name = "trance-gpu"
-version = "0.3.4"
-dependencies = [
- "bytemuck",
- "trance-api",
 ]
 
 [[package]]
@@ -5009,7 +5001,15 @@ dependencies = [
  "libloading",
  "sysinfo",
  "trance-api",
- "trance-gpu",
+ "trance-upscaler",
+]
+
+[[package]]
+name = "trance-upscaler"
+version = "0.3.4"
+dependencies = [
+ "bytemuck",
+ "trance-api",
 ]
 
 [[package]]
