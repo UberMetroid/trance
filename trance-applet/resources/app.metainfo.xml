@@ -6,7 +6,7 @@
   <name>Trance</name>
   <summary>Screensaver applet for COSMIC</summary>
   <icon type="stock">display-symbolic</icon>
-  <url type="vcs-browser">https://github.com/local76/trance</url>
+  <url type="vcs-browser">https://github.com/UberMetroid/trance</url>
   <launchable type="desktop-id">com.system76.CosmicApplet.Trance.desktop</launchable>
   <provides>
     <id>com.system76.CosmicApplet</id>

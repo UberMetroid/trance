@@ -1,6 +1,6 @@
 [package]
 name = "trance-cli"
-version = "0.3.4"
+version = "0.3.5"
 edition = "2024"
 description = "Command-line interface for the trance screensaver daemon"
 license = "MIT"
@@ -19,8 +19,8 @@ libc = { workspace = true }
 [package.metadata.deb]
 name = "trance-cli"
 changelog = "debian/changelog"
-copyright = "2026 Screensavers Developer <dev@local76.org>"
-maintainer = "Screensavers Developer <dev@local76.org>"
+copyright = "2026 UberMetroid <admin@ubermetroid.com>"
+maintainer = "UberMetroid <admin@ubermetroid.com>"
 extended-description = "Thin CLI for controlling the trance screensaver daemon over D-Bus."
 depends = "libc6, trance"
 section = "utils"
