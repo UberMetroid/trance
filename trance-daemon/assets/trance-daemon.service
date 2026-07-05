@@ -26,6 +26,7 @@ KillMode=mixed
 # the rule and rely on PrivateTmp instead.
 NoNewPrivileges=true
 ProtectSystem=strict
+ReadWritePaths=%t
 PrivateTmp=true
 ProtectHome=read-only
 MemoryDenyWriteExecute=true

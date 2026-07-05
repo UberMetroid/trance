@@ -1,8 +1,8 @@
-trance-plugins-all (0.3.7-1) flux; urgency=medium
+trance-plugins-all (0.3.8-1) flux; urgency=medium
 
-  * Upgrade to 0.3.7 version.
+  * Upgrade to 0.3.8 version.
 
- -- Screensavers Developer <dev@local76.org>  Sat, 04 Jul 2026 19:00:00 -1000
+ -- Screensavers Developer <dev@local76.org>  Sat, 04 Jul 2026 19:05:00 -1000
 
 trance-plugins-all (0.3.4-1) flux; urgency=medium
 

@@ -1,10 +1,11 @@
-trance (0.3.7-1) flux; urgency=medium
+trance (0.3.8-1) flux; urgency=medium
 
-  * Upgrade to 0.3.7 version.
+  * Upgrade to 0.3.8 version.
+  * Allow systemd service to write its PID file to runtime directory under strict sandboxing.
   * Implement org.freedesktop.ScreenSaver D-Bus service for video inhibition.
   * Modularize cell_renderer and plugin_session code structures.
 
- -- Screensavers Developer <dev@local76.org>  Sat, 04 Jul 2026 19:00:00 -1000
+ -- Screensavers Developer <dev@local76.org>  Sat, 04 Jul 2026 19:05:00 -1000
 
 trance (0.3.4-1) flux; urgency=medium
 
