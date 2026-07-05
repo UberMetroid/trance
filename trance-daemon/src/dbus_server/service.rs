@@ -14,7 +14,7 @@ pub struct TranceService {
     pub controller: Arc<DaemonController>,
 }
 
-#[zbus::interface(name = "com.ubermetroid.Trance")]
+#[zbus::interface(name = "io.github.ubermetroid.trance")]
 #[allow(deprecated)]
 impl TranceService {
     async fn get_status(&self) -> zbus::fdo::Result<HashMap<String, OwnedValue>> {

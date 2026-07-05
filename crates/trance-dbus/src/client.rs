@@ -8,9 +8,9 @@ use crate::SERVICE_NAME;
 use crate::status::DaemonStatus;
 
 #[zbus::proxy(
-    interface = "com.ubermetroid.Trance",
-    default_service = "com.ubermetroid.Trance",
-    default_path = "/com/ubermetroid/Trance",
+    interface = "io.github.ubermetroid.trance",
+    default_service = "io.github.ubermetroid.trance",
+    default_path = "/io/github/ubermetroid/trance",
     gen_blocking = true
 )]
 trait Trance {

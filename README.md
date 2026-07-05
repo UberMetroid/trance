@@ -92,7 +92,7 @@ Trance provides a unified command-line tool `trance` (built from `trance-cli`) t
 
 ## D-Bus API
 
-The daemon exports `com.ubermetroid.Trance` on the session bus at `/com/ubermetroid/Trance`.
+The daemon exports `io.github.ubermetroid.trance` on the session bus at `/io/github/ubermetroid/trance`.
 
 | Method | Description |
 |---|---|
