@@ -11,6 +11,7 @@ members = [
     "trance-cli",
     "trance-applet",
     "trance-plugins-all",
+    "trance-tui",
 ]
 
 [profile.release]

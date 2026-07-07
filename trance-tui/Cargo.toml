@@ -1,0 +1,38 @@
+[package]
+name = "trance-tui"
+version = "0.3.23"
+edition = "2024"
+description = "TUI client for screensaver daemon configuration"
+license = "Apache-2.0"
+
+[dependencies]
+crossterm = "0.28"
+ratatui = "0.28"
+anyhow = { workspace = true }
+trance-dbus = { workspace = true }
+trance-runner = { workspace = true }
+
+[package.metadata.deb]
+name = "trance-tui"
+maintainer = "UberMetroid <jerydleuck@gmail.com>"
+extended-description = "TUI client for screensaver daemon configuration."
+depends = "libc6, trance"
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/release/trance-tui", "usr/bin/trance-tui", "755"]
+]
+
+[package.metadata.generate-rpm]
+name = "trance-tui"
+release = "1"
+arch = "x86_64"
+summary = "TUI client for screensaver daemon configuration"
+description = "TUI client for screensaver daemon configuration."
+license = "Apache-2.0"
+assets = [
+    { source = "target/release/trance-tui", dest = "/usr/bin/trance-tui", mode = "755" }
+]
+
+[package.metadata.generate-rpm.requires]
+trance = "*"
