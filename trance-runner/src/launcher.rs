@@ -45,25 +45,31 @@ pub fn is_allowed_saver(name: &str) -> bool {
 
 /// Reduce a raw name or path to a clean basename, if valid.
 pub fn sanitize_saver_name(raw: &str) -> Option<String> {
-    let stem = Path::new(raw)
+    let mut stem = Path::new(raw)
         .file_stem()
         .and_then(|s| s.to_str())
-        .unwrap_or(raw);
+        .unwrap_or(raw)
+        .to_string();
+
+    if stem.starts_with("libscreensaver_") {
+        stem = stem["libscreensaver_".len()..].to_string();
+    } else if stem.starts_with("lib") {
+        stem = stem["lib".len()..].to_string();
+    }
+
+    if stem.starts_with("screensaver-") {
+        stem = stem["screensaver-".len()..].to_string();
+    }
 
     if !stem.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
         return None;
     }
 
-    let mut cleaned = stem.to_string();
-    if cleaned.starts_with("screensaver-") {
-        cleaned = cleaned["screensaver-".len()..].to_string();
-    }
-
-    if cleaned.is_empty() {
+    if stem.is_empty() {
         return None;
     }
 
-    Some(cleaned)
+    Some(stem)
 }
 
 fn dev_plugin_dirs(clean: &str) -> Vec<PathBuf> {

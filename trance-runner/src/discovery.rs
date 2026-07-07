@@ -65,8 +65,9 @@ pub fn detect_screensavers() -> Vec<String> {
                     #[cfg(unix)]
                     {
                         use std::os::unix::fs::PermissionsExt;
-                        // Check if file is executable
-                        if metadata.permissions().mode() & 0o111 != 0
+                        let is_so = entry.path().extension().is_some_and(|ext| ext == "so");
+                        let is_exec = metadata.permissions().mode() & 0o111 != 0;
+                        if (is_so || is_exec)
                             && let Some(name) = entry.file_name().to_str()
                             && is_allowed_saver(name)
                         {

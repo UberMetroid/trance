@@ -84,6 +84,7 @@ fn run(args: Vec<String>) -> Result<()> {
         "timeout" => cmd_timeout(&client, &args[1..]),
         "saver" => cmd_saver(&client, &args[1..]),
         "list" => cmd_list(&client),
+        "inhibitors" => cmd_inhibitors(&client),
         "preview" => cmd_preview(&client, &args[1..]),
         "stop" => client
             .stop_preview()
@@ -173,6 +174,21 @@ fn cmd_list(client: &TranceClient) -> Result<()> {
         .context("listing installed savers via d-bus")?;
     for saver in savers {
         println!("{saver}");
+    }
+    Ok(())
+}
+
+fn cmd_inhibitors(client: &TranceClient) -> Result<()> {
+    let inhibitors = client
+        .list_inhibitors()
+        .context("listing active inhibitors via d-bus")?;
+    if inhibitors.is_empty() {
+        println!("No active inhibitors.");
+    } else {
+        println!("Active inhibitors:");
+        for (cookie, app, reason) in inhibitors {
+            println!("  [{cookie}] {app}: {reason}");
+        }
     }
     Ok(())
 }

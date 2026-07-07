@@ -172,6 +172,13 @@ impl TranceService {
         Ok(())
     }
 
+    async fn list_inhibitors(
+        &self,
+        #[zbus(header)] _header: zbus::message::Header<'_>,
+    ) -> zbus::fdo::Result<Vec<(u32, String, String)>> {
+        Ok(self.controller.inhibitors.list())
+    }
+
     /// DEPRECATED (2026) — no-op.
     ///
     /// The previous `trance-gpu` crate was renamed to `trance-upscaler`

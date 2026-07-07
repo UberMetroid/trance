@@ -144,8 +144,16 @@ impl FramePacing {
         session: &mut PluginSession,
     ) -> Self {
         let present_refresh = presentation_refresh_hz(layouts, primary);
-        let present_fps = target_fps(present_refresh);
-        let tick_hz = simulation_tick_hz();
+        let mut present_fps = target_fps(present_refresh);
+        let mut tick_hz = simulation_tick_hz();
+
+        let sys = trance_runner::toolkit::sys_info::get_system_info();
+        if sys.power_status.contains("Battery") {
+            present_fps = present_fps.min(30.0);
+            tick_hz = tick_hz.min(30.0);
+            tracing::info!("Battery power detected: capping physics simulation and rendering frame rate targets to 30 FPS/Hz");
+        }
+
         let frame_duration = Duration::from_secs_f32(1.0 / present_fps);
         session.set_simulation_rate(tick_hz);
         Self {

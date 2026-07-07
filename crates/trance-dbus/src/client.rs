@@ -34,6 +34,8 @@ trait Trance {
 
     fn un_inhibit(&self, cookie: u32) -> zbus::Result<()>;
 
+    fn list_inhibitors(&self) -> zbus::Result<Vec<(u32, String, String)>>;
+
     fn set_gpu_enabled(&self, enabled: bool) -> zbus::Result<()>;
 
     fn set_show_fps_overlay(&self, enabled: bool) -> zbus::Result<()>;
@@ -90,6 +92,10 @@ impl TranceClient {
 
     pub fn un_inhibit(&self, cookie: u32) -> zbus::Result<()> {
         self.proxy()?.un_inhibit(cookie)
+    }
+
+    pub fn list_inhibitors(&self) -> zbus::Result<Vec<(u32, String, String)>> {
+        self.proxy()?.list_inhibitors()
     }
 
     pub fn set_gpu_enabled(&self, enabled: bool) -> zbus::Result<()> {

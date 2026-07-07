@@ -119,6 +119,20 @@ impl InhibitorState {
         let mut inhibitors = self.inhibitors.lock().unwrap();
         inhibitors.retain(|entry| entry.client != *client);
     }
+
+    pub fn list(&self) -> Vec<(u32, String, String)> {
+        let inhibitors = self.inhibitors.lock().unwrap();
+        inhibitors
+            .iter()
+            .map(|entry| {
+                (
+                    entry.cookie,
+                    entry.application_name.clone(),
+                    entry.reason.clone(),
+                )
+            })
+            .collect()
+    }
 }
 
 #[cfg(target_os = "linux")]

@@ -11,6 +11,7 @@ pub fn print_usage() {
            timeout <minutes>      Set idle timeout (1–240)\n\
            saver set <name|random>\n\
            saver list | list      List installed savers\n\
+           inhibitors             List active system inhibitors blocking screensaver\n\
            preview <saver>        Preview a screensaver now\n\
            stop                   Stop preview or idle presentation\n\
            fps-overlay on|off|status  Toggle on-screen FPS overlay\n\
