@@ -20,6 +20,13 @@ pub fn handle_bug_report() -> Result<()> {
     let xdg_runtime = std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "not set".to_string());
     report.push_str(&format!("* **XDG_RUNTIME_DIR**: `{xdg_runtime}`\n"));
     let home = std::env::var("HOME").unwrap_or_else(|_| "/home/user".to_string());
+    report.push_str(&format!(
+        "* **CLI version**: `{}`\n",
+        env!("CARGO_PKG_VERSION")
+    ));
+    if let Some(pkg) = package_version_line() {
+        report.push_str(&format!("* **Package**: `{pkg}`\n"));
+    }
     report.push('\n');
 
     // Daemon & Service Status
@@ -77,6 +84,32 @@ pub fn handle_bug_report() -> Result<()> {
     println!("{report}");
 
     Ok(())
+}
+
+fn package_version_line() -> Option<String> {
+    if let Ok(o) = Command::new("rpm")
+        .args(["-q", "trance", "--qf", "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}"])
+        .output()
+    {
+        if o.status.success() {
+            let s = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            if !s.is_empty() {
+                return Some(format!("rpm {s}"));
+            }
+        }
+    }
+    if let Ok(o) = Command::new("dpkg-query")
+        .args(["-W", "-f=${Package} ${Version}", "trance"])
+        .output()
+    {
+        if o.status.success() {
+            let s = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            if !s.is_empty() {
+                return Some(format!("deb {s}"));
+            }
+        }
+    }
+    None
 }
 
 fn get_config_path() -> Option<PathBuf> {

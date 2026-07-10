@@ -41,6 +41,7 @@ pub fn run_doctor(fix: bool) -> Result<()> {
         check_running_pid(),
         check_config_parses(),
         check_fonts(),
+        check_package_install(),
     ];
     print_results(&results);
     if !results.iter().all(|r| r.passed) {
@@ -251,6 +252,35 @@ fn check_fonts() -> CheckResult {
         println!("     -> Fix: Please install fonts-dejavu-core or a system monospace font.");
         chk("System Fonts", false, "monospace font missing")
     }
+}
+
+fn check_package_install() -> CheckResult {
+    // Prefer RPM: Fedora often has apt-cache on PATH too.
+    if let Ok(o) = Command::new("rpm")
+        .args(["-q", "trance", "--qf", "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}"])
+        .output()
+    {
+        if o.status.success() {
+            let ver = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            println!(" [✔] Package (RPM): {ver}");
+            println!("     -> Upgrade with: sudo dnf update");
+            return chk("Package", true, ver);
+        }
+    }
+    if let Ok(o) = Command::new("dpkg-query")
+        .args(["-W", "-f=${Package} ${Version}", "trance"])
+        .output()
+    {
+        if o.status.success() {
+            let ver = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            println!(" [✔] Package (DEB): {ver}");
+            println!("     -> Upgrade with: sudo apt update && sudo apt upgrade");
+            return chk("Package", true, ver);
+        }
+    }
+    println!(" [!] Package: trance not found via RPM or dpkg.");
+    println!("     -> Install from the UberMetroid apt/dnf repository.");
+    chk("Package", true, "not a system package")
 }
 
 fn print_results(results: &[CheckResult]) {

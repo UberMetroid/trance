@@ -291,6 +291,9 @@ fn print_version(verbose: bool) {
     println!("Trance screensaver control CLI");
     println!("License: Apache-2.0");
     println!("Home:    https://github.com/UberMetroid/trance");
+    if let Some(pkg) = package_version_hint() {
+        println!("Package: {pkg}");
+    }
     if daemon_available() {
         if let Ok(client) = TranceClient::connect() {
             if let Ok(status) = client.get_status() {
@@ -305,4 +308,32 @@ fn print_version(verbose: bool) {
     } else {
         println!("Daemon:  not running");
     }
+}
+
+/// Installed system package version (RPM or DEB), if any.
+fn package_version_hint() -> Option<String> {
+    // Prefer RPM (Fedora may also have apt-cache on PATH).
+    if let Ok(o) = std::process::Command::new("rpm")
+        .args(["-q", "trance", "--qf", "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}"])
+        .output()
+    {
+        if o.status.success() {
+            let s = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            if !s.is_empty() && !s.contains("is not installed") {
+                return Some(s);
+            }
+        }
+    }
+    if let Ok(o) = std::process::Command::new("dpkg-query")
+        .args(["-W", "-f=${Package} ${Version}", "trance"])
+        .output()
+    {
+        if o.status.success() {
+            let s = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            if !s.is_empty() {
+                return Some(s);
+            }
+        }
+    }
+    None
 }
