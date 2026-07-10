@@ -1,3 +1,9 @@
+trance-applet (0.3.38-1) unstable; urgency=medium
+
+  * Version alignment with trance core 0.3.38 (hero plugins, packaging fixes).
+
+ -- UberMetroid <jerydleuck@gmail.com>  Fri, 10 Jul 2026 08:45:00 -1000
+
 trance-applet (0.3.16-1) flux; urgency=medium
 
   * Upgrade to 0.3.16 version.

@@ -6,6 +6,13 @@ Wayland-native screensaver for Linux. A background daemon watches for idle time 
 
 Works on any Wayland desktop. Control it with the **CLI**, **TUI**, or optional **COSMIC** panel applet.
 
+### What’s new (0.3.38)
+
+- **Upgrades keep the daemon running** — packaging no longer leaves `trance-daemon` stopped after `dnf upgrade`
+- **D-Bus control works under systemd hardening** (preview/stop no longer AccessDenied)
+- **Hero polish** on all eight effects via [trance-plugins](https://github.com/UberMetroid/trance-plugins) (soft light, depth, staggered motion, intro fade)
+- CLI / applet / TUI / plugins-all version-aligned with core
+
 ---
 
 ## Install
