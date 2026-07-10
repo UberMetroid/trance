@@ -1,6 +1,6 @@
 [package]
 name = "trance-daemon"
-version = "0.3.35"
+version = "0.3.36"
 edition = "2024"
 description = "Background idle daemon and core package for trance screensavers"
 license = "Apache-2.0"
@@ -69,6 +69,8 @@ license = "Apache-2.0"
 # Soft user-service reload on install/upgrade (never fails the RPM transaction).
 post_install_script = "rpm/post.sh"
 pre_uninstall_script = "rpm/preun.sh"
+# After full transaction: recover if an old package's preun stopped the daemon.
+post_trans_script = "rpm/posttrans.sh"
 assets = [
     { source = "target/release/trance-daemon", dest = "/usr/bin/trance-daemon", mode = "755" },
     { source = "assets/trance-daemon.service", dest = "/usr/lib/systemd/user/trance-daemon.service", mode = "644" },

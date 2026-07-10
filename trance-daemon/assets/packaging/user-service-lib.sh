@@ -51,19 +51,26 @@ try_stop_trance() {
     _user_systemctl "$_uid" "$_user" stop trance-daemon.service || true
 }
 
-# Prefer try-restart: only restarts if already running (no surprise starts
-# for headless / non-graphical users). Fall back to reset-failed.
+# If enabled for this user, always restart (upgrades must leave the daemon
+# running on the new binary). try-restart alone is a no-op when inactive.
 try_restart_trance() {
     _uid="$1"
     _user="$2"
-    echo "-> try-restart trance-daemon for ${_user}"
+    echo "-> restart trance-daemon for ${_user} (if enabled/active)"
     _user_systemctl "$_uid" "$_user" reset-failed trance-daemon.service || true
-    if _user_systemctl "$_uid" "$_user" try-restart trance-daemon.service; then
-        echo "   restarted (or was inactive) for ${_user}"
+    if command -v runuser >/dev/null 2>&1; then
+        if runuser -u "$_user" -- env \
+            XDG_RUNTIME_DIR="/run/user/$_uid" \
+            DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$_uid/bus" \
+            systemctl --user is-enabled trance-daemon.service >/dev/null 2>&1; then
+            _user_systemctl "$_uid" "$_user" restart trance-daemon.service || true
+            return 0
+        fi
+    elif systemctl --user --machine="${_user}@" is-enabled trance-daemon.service >/dev/null 2>&1; then
+        _user_systemctl "$_uid" "$_user" restart trance-daemon.service || true
         return 0
     fi
-    # Older systemctl without try-restart
-    _user_systemctl "$_uid" "$_user" restart trance-daemon.service || true
+    _user_systemctl "$_uid" "$_user" try-restart trance-daemon.service || true
 }
 
 print_user_hint() {

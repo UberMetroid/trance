@@ -1,6 +1,11 @@
 #!/bin/sh
-# RPM %post — $1 is count of packages of this name left installed
-# (1 = fresh install, 2+ = upgrade). Always best-effort.
+# RPM %posttrans — runs after the *entire* transaction (installs + uninstalls).
+#
+# Why this exists: DNF/RPM may run %post of the new package first, then %preun
+# of the *old* package. Older trance preun scripts stopped the user service on
+# upgrade, which left the daemon dead after the new package had already
+# restarted it. posttrans restarts once more so upgrades stay healthy even when
+# the old package still carries the buggy preun.
 set -u
 
 for_each_user_session() {
@@ -27,19 +32,10 @@ _user_systemctl() {
     systemctl --user --machine="${_user}@" "$@" 2>/dev/null || true
 }
 
-try_reload_user_units() {
-    echo "-> daemon-reload for $2"
+try_restart_if_enabled() {
+    echo "-> posttrans restart trance-daemon for $2 (if enabled)"
     _user_systemctl "$1" "$2" daemon-reload || true
-}
-
-# If the unit is enabled for this user, always restart so upgrades leave the
-# daemon running on the new binary. try-restart alone is a no-op when the
-# unit is inactive (e.g. after an older package's preun stopped it).
-try_restart_trance() {
-    echo "-> restart trance-daemon for $2 (if enabled/active)"
     _user_systemctl "$1" "$2" reset-failed trance-daemon.service || true
-    # is-enabled returns 0 for enabled/static/alias/indirect; we treat that
-    # as "user wants this service". Capture status without the || true mask.
     if command -v runuser >/dev/null 2>&1; then
         if runuser -u "$2" -- env \
             XDG_RUNTIME_DIR="/run/user/$1" \
@@ -52,22 +48,10 @@ try_restart_trance() {
         _user_systemctl "$1" "$2" restart trance-daemon.service || true
         return 0
     fi
-    # Not enabled: only bounce if currently running (no surprise autostart).
+    # Not enabled: only bounce if already active.
     _user_systemctl "$1" "$2" try-restart trance-daemon.service || true
 }
 
-echo "trance RPM post-install (best-effort user service reload)..."
-# Remove legacy XDG autostart (systemd user unit is the only start path).
-rm -f /etc/xdg/autostart/trance-daemon.desktop 2>/dev/null || true
-
-for_each_user_session try_reload_user_units
-for_each_user_session try_restart_trance
-
-echo ""
-echo "  If the daemon is not running, as your desktop user:"
-echo "    systemctl --user enable --now trance-daemon"
-echo "    # or: trance doctor --fix"
-echo "  COSMIC panel UI (optional): dnf install trance-applet"
-echo ""
-
+echo "trance RPM post-transaction (ensure daemon running if enabled)..."
+for_each_user_session try_restart_if_enabled
 exit 0

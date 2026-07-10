@@ -51,8 +51,17 @@ else
     }
     try_restart_trance() {
         _user_systemctl "$1" "$2" reset-failed trance-daemon.service || true
-        _user_systemctl "$1" "$2" try-restart trance-daemon.service \
-            || _user_systemctl "$1" "$2" restart trance-daemon.service || true
+        # Enabled → always restart (try-restart is a no-op when inactive).
+        if command -v runuser >/dev/null 2>&1; then
+            if runuser -u "$2" -- env \
+                XDG_RUNTIME_DIR="/run/user/$1" \
+                DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$1/bus" \
+                systemctl --user is-enabled trance-daemon.service >/dev/null 2>&1; then
+                _user_systemctl "$1" "$2" restart trance-daemon.service || true
+                return 0
+            fi
+        fi
+        _user_systemctl "$1" "$2" try-restart trance-daemon.service || true
     }
     print_user_hint() {
         echo "  If needed: systemctl --user enable --now trance-daemon"

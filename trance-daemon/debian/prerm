@@ -1,5 +1,7 @@
 #!/bin/sh
-# prerm for trance — soft-stop only; never fail the package transaction.
+# prerm for trance — only stop/disable on full remove.
+# On upgrade, leave the daemon running; postinst restarts onto the new binary.
+# (Stopping on upgrade races with packaging order and leaves the service dead.)
 set -u
 
 for_each_user_session() {
@@ -27,14 +29,16 @@ _user_systemctl() {
 }
 
 try_stop_trance() {
-    echo "-> stop trance-daemon for $2 (best-effort)"
+    echo "-> stop trance-daemon for $2 (remove)"
     _user_systemctl "$1" "$2" stop trance-daemon.service || true
 }
 
 case "${1:-}" in
-    remove|upgrade|deconfigure)
-        # Soft stop so the binary can be replaced; postinst will try-restart.
+    remove|deconfigure)
         for_each_user_session try_stop_trance
+        ;;
+    upgrade|failed-upgrade)
+        # Leave service running across upgrades.
         ;;
 esac
 
