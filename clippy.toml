@@ -1,4 +1,4 @@
-# Clippy configuration for crateria companion apps.
+# Clippy configuration for all crateria workspaces.
 # Schema validated against clippy 0.1.96.
 
 # Allow expect/unwrap in tests.
@@ -17,5 +17,5 @@ too-many-arguments-threshold = 8
 # Maximum type complexity.
 type-complexity-threshold = 250
 
-# MSRV (minimum supported Rust version) — must match Dockerfile base.
+# MSRV (minimum supported Rust version)
 msrv = "1.96"

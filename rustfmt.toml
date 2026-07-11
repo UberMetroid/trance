@@ -1,5 +1,4 @@
-# Rust formatter configuration for crateria companion apps.
-# Kept intentionally minimal; overridable per-crate if needed.
+# Rust formatter configuration for all crateria workspaces.
 
 edition = "2024"
 max_width = 100
