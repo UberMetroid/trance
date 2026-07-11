@@ -5757,7 +5757,7 @@ version = "0.3.44"
 
 [[package]]
 name = "trance-runner"
-version = "0.3.45"
+version = "0.3.46"
 dependencies = [
  "crossterm",
  "fontdue",
