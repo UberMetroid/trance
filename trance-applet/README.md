@@ -1,6 +1,6 @@
 # trance-applet
 
-Optional **COSMIC Desktop** panel applet for the [Trance screensaver suite](https://github.com/UberMetroid/trance).
+Optional **COSMIC Desktop** panel applet for the [Trance screensaver suite](https://github.com/crateria/trance).
 
 It is **not** pulled in by default with the core `trance` package (GNOME/KDE/Hyprland users should use `trance-tui` / `trance` instead).
 
@@ -37,5 +37,5 @@ Packaged binary: `/usr/bin/trance-applet` (must live under `/usr/bin` for D-Bus 
 
 ## See also
 
-- [Main README](https://github.com/UberMetroid/trance) — install, upgrade path, `trance doctor --fix`
+- [Main README](https://github.com/crateria/trance) — install, upgrade path, `trance doctor --fix`
 - Non-COSMIC UI: `trance-tui`

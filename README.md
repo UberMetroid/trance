@@ -10,7 +10,7 @@ Works on any Wayland desktop. Control it with the **CLI**, **TUI**, or optional 
 
 - **Upgrades keep the daemon running** — packaging no longer leaves `trance-daemon` stopped after `dnf upgrade`
 - **D-Bus control works under systemd hardening** (preview/stop no longer AccessDenied)
-- **Hero polish** on all eight effects via [trance-plugins](https://github.com/UberMetroid/trance-plugins) (soft light, depth, staggered motion, intro fade)
+- **Hero polish** on all eight effects via [trance-plugins](https://github.com/crateria/trance-plugins) (soft light, depth, staggered motion, intro fade)
 - CLI / applet / TUI / plugins-all version-aligned with core
 
 ---
@@ -174,7 +174,7 @@ trance-tui
 
 ## Links
 
-* [packages](https://github.com/UberMetroid/packages) · [trance-plugins](https://github.com/UberMetroid/trance-plugins) · [SECURITY.md](SECURITY.md)
+* [packages](https://github.com/UberMetroid/packages) · [trance-plugins](https://github.com/crateria/trance-plugins) · [SECURITY.md](SECURITY.md)
 
 ## License
 

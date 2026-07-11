@@ -1,10 +1,10 @@
 [package]
 name = "trance-applet"
-version = "0.3.40"
+version = "0.3.41"
 edition = "2024"
 license = "Apache-2.0"
 description = "COSMIC Desktop panel applet for the trance screensavers"
-repository = "https://github.com/UberMetroid/trance"
+repository = "https://github.com/crateria/trance"
 
 [lints]
 workspace = true

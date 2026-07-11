@@ -319,7 +319,7 @@ fn print_version(verbose: bool) {
     //   trance about
     println!("Trance screensaver control CLI");
     println!("License: Apache-2.0");
-    println!("Home:    https://github.com/UberMetroid/trance");
+    println!("Home:    https://github.com/crateria/trance");
     if let Some(pkg) = package_version_hint() {
         println!("Package: {pkg}");
     }
