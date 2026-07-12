@@ -34,10 +34,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.96.0
+      - name: Install Rust (from rust-toolchain.toml)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          rustup show
+          rustc --version
+          cargo --version
 
       - name: Install cargo-deny
         run: |
@@ -68,22 +71,28 @@ jobs:
             libssl-dev \
             libpam0g-dev
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.96.0
-          components: rustfmt, clippy
+      - name: Install Rust (from rust-toolchain.toml)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          rustup component add rustfmt clippy
+          rustup show
+          rustc --version
+          cargo --version
 
       - name: cargo clippy fix
-        run: cargo clippy --fix --workspace --all-targets --allow-dirty --allow-staged
+        run: cargo clippy --workspace --all-targets --allow-dirty --allow-staged --fix
 
       - name: cargo fmt
         run: cargo fmt --all
 
       - name: Commit fmt and clippy --fix changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "style: auto-format and apply clippy fixes"
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff-index --quiet HEAD || git commit -m "style: auto-format and apply clippy fixes"
+          git push
 
       - name: Run clippy check
         run: cargo clippy --workspace --all-targets
