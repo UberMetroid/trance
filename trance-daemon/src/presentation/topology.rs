@@ -94,27 +94,27 @@ fn parse_custom_layouts(s: &str) -> HashMap<u32, CustomOverride> {
             continue;
         }
         let parts: Vec<&str> = entry.split(':').collect();
-        if parts.len() == 2 {
-            if let Ok(id) = parts[0].parse::<u32>() {
-                let coords: Vec<&str> = parts[1].split(',').collect();
-                let mut ov = CustomOverride::default();
-                if coords.len() >= 1 {
-                    ov.x = coords[0].parse().ok();
-                }
-                if coords.len() >= 2 {
-                    ov.y = coords[1].parse().ok();
-                }
-                if coords.len() >= 3 {
-                    ov.w = coords[2].parse().ok();
-                }
-                if coords.len() >= 4 {
-                    ov.h = coords[3].parse().ok();
-                }
-                if coords.len() >= 5 {
-                    ov.scale = coords[4].parse().ok();
-                }
-                map.insert(id, ov);
+        if parts.len() == 2
+            && let Ok(id) = parts[0].parse::<u32>()
+        {
+            let coords: Vec<&str> = parts[1].split(',').collect();
+            let mut ov = CustomOverride::default();
+            if !coords.is_empty() {
+                ov.x = coords[0].parse().ok();
             }
+            if coords.len() >= 2 {
+                ov.y = coords[1].parse().ok();
+            }
+            if coords.len() >= 3 {
+                ov.w = coords[2].parse().ok();
+            }
+            if coords.len() >= 4 {
+                ov.h = coords[3].parse().ok();
+            }
+            if coords.len() >= 5 {
+                ov.scale = coords[4].parse().ok();
+            }
+            map.insert(id, ov);
         }
     }
     map

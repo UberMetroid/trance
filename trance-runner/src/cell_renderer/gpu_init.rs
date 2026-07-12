@@ -187,10 +187,10 @@ impl GpuCellRenderer {
         size: u64,
         usage: wgpu::BufferUsages,
     ) -> (wgpu::Buffer, bool) {
-        if let Some(buf) = current.as_ref() {
-            if buf.size() >= size {
-                return (buf.clone(), false);
-            }
+        if let Some(buf) = current.as_ref()
+            && buf.size() >= size
+        {
+            return (buf.clone(), false);
         }
         let new_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some(label),
@@ -211,10 +211,11 @@ impl GpuCellRenderer {
         format: wgpu::TextureFormat,
         usage: wgpu::TextureUsages,
     ) -> (wgpu::Texture, bool) {
-        if let Some(tex) = current.as_ref() {
-            if tex.width() == width && tex.height() == height {
-                return (tex.clone(), false);
-            }
+        if let Some(tex) = current.as_ref()
+            && tex.width() == width
+            && tex.height() == height
+        {
+            return (tex.clone(), false);
         }
         let new_tex = device.create_texture(&wgpu::TextureDescriptor {
             label: Some(label),

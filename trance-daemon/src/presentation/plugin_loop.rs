@@ -30,7 +30,7 @@ pub fn run_plugin_loop(
     }
 
     let topology = super::topology::DisplayTopologyMap::build(&layouts);
-    for layout in layouts.iter_mut() {
+    for layout in &mut layouts {
         if let Some(topo) = topology.monitors.iter().find(|m| m.id == layout.id) {
             layout.x = topo.x;
             layout.y = topo.y;

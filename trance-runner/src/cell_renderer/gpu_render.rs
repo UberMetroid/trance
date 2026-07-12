@@ -96,28 +96,28 @@ impl GpuCellRenderer {
 
         let recreate_bind = recreate_bg || c_re || u_re || a_re;
 
-        if atlas_dirty || recreate_bind {
-            if let Some(ref atlas_tex) = self.atlas_texture {
-                self.queue.write_texture(
-                    wgpu::TexelCopyTextureInfo {
-                        texture: atlas_tex,
-                        mip_level: 0,
-                        origin: wgpu::Origin3d::ZERO,
-                        aspect: wgpu::TextureAspect::All,
-                    },
-                    atlas_image,
-                    wgpu::TexelCopyBufferLayout {
-                        offset: 0,
-                        bytes_per_row: Some(atlas_w as u32),
-                        rows_per_image: None,
-                    },
-                    wgpu::Extent3d {
-                        width: atlas_w as u32,
-                        height: atlas_h as u32,
-                        depth_or_array_layers: 1,
-                    },
-                );
-            }
+        if (atlas_dirty || recreate_bind)
+            && let Some(ref atlas_tex) = self.atlas_texture
+        {
+            self.queue.write_texture(
+                wgpu::TexelCopyTextureInfo {
+                    texture: atlas_tex,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                atlas_image,
+                wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(atlas_w as u32),
+                    rows_per_image: None,
+                },
+                wgpu::Extent3d {
+                    width: atlas_w as u32,
+                    height: atlas_h as u32,
+                    depth_or_array_layers: 1,
+                },
+            );
         }
 
         if recreate_bind || self.bind_group.is_none() {
@@ -157,7 +157,7 @@ impl GpuCellRenderer {
             cell_height: cell_height as u32,
             atlas_cols: atlas_cols as u32,
             atlas_rows: atlas_rows as u32,
-            scanlines: if scanlines { 1 } else { 0 },
+            scanlines: u32::from(scanlines),
             padding: 0,
         };
         self.queue
@@ -185,7 +185,7 @@ impl GpuCellRenderer {
                         bg_color,
                         fg_color,
                         char_idx,
-                        bold: if cell.bold { 1 } else { 0 },
+                        bold: u32::from(cell.bold),
                     });
                 } else {
                     gpu_cells.push(GpuCell {

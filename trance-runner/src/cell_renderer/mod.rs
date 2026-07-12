@@ -116,10 +116,10 @@ impl CellRenderer {
                     let grid_row = row_start + row;
                     let grid_col = col_start + col;
                     let index = grid_row * grid_cols + grid_col;
-                    if let Some(cell) = grid.get(index) {
-                        if cell.ch != ' ' {
-                            self.get_or_insert_atlas_char(cell.ch);
-                        }
+                    if let Some(cell) = grid.get(index)
+                        && cell.ch != ' '
+                    {
+                        self.get_or_insert_atlas_char(cell.ch);
                     }
                 }
             }

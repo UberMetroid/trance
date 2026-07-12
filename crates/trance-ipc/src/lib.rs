@@ -204,10 +204,10 @@ impl Drop for SharedMemory {
             if self.fd >= 0 {
                 libc::close(self.fd);
             }
-            if self.is_owner {
-                if let Ok(c_name) = CString::new(self.name.clone()) {
-                    libc::shm_unlink(c_name.as_ptr());
-                }
+            if self.is_owner
+                && let Ok(c_name) = CString::new(self.name.clone())
+            {
+                libc::shm_unlink(c_name.as_ptr());
             }
         }
     }
