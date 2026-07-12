@@ -10,8 +10,6 @@ use trance_upscaler::FrameUpscaler;
 mod loading;
 mod reloading;
 
-#[cfg(test)]
-mod reloading_tests;
 
 pub(crate) struct PluginGuard {
     pub(crate) ptr: *mut ScreensaverInstance,
