@@ -28,7 +28,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          git init
+          git remote add origin https://github.com/crateria/trance.git
+          git fetch --depth=1 origin ${{ github.sha }}
+          git reset --hard FETCH_HEAD
 
       - name: Install Rust (from rust-toolchain.toml)
         run: |
@@ -54,9 +58,11 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref }}
+        run: |
+          git init
+          git remote add origin https://github.com/crateria/trance.git
+          git fetch --depth=1 origin ${{ github.sha }}
+          git reset --hard FETCH_HEAD
 
       - name: Install system libraries
         run: |
