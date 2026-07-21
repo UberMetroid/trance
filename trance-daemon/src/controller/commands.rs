@@ -7,7 +7,7 @@ use super::{DaemonCommand, DaemonController};
 use crate::config::DaemonConfig;
 
 impl DaemonController {
-    fn mutate_config<F>(&self, f: F) -> anyhow::Result<()>
+    pub fn mutate_config<F>(&self, f: F) -> anyhow::Result<()>
     where
         F: FnOnce(&mut DaemonConfig),
     {

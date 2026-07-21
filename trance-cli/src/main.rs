@@ -17,6 +17,7 @@ mod completion;
 mod config;
 mod doctor;
 mod doctor_checks;
+mod doctor_sys;
 mod interactive;
 mod self_update;
 mod self_update_backend;

@@ -17,6 +17,18 @@ fn test_completion_zsh() {
 }
 
 #[test]
+fn test_completion_fish() {
+    let res = run(vec!["completion".to_string(), "fish".to_string()]);
+    assert!(res.is_ok());
+}
+
+#[test]
+fn test_completion_nu() {
+    let res = run(vec!["completion".to_string(), "nu".to_string()]);
+    assert!(res.is_ok());
+}
+
+#[test]
 fn test_completion_invalid() {
     let res = run(vec!["completion".to_string(), "invalid".to_string()]);
     assert!(res.is_err());

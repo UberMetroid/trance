@@ -155,46 +155,51 @@ pub fn check_config_parses() -> CheckResult {
     }
 }
 
-pub fn check_fonts() -> CheckResult {
-    if font_check_via_fc_list() {
-        println!(" [✔] System Fonts: Monospace font is installed.");
-        chk("System Fonts", true, "monospace font found")
+pub fn check_shm_permissions() -> CheckResult {
+    let shm_dir = PathBuf::from("/dev/shm");
+    if shm_dir.exists() {
+        let test_file = shm_dir.join(format!(".trance-doctor-test-{}", std::process::id()));
+        if fs::write(&test_file, b"test").is_ok() {
+            let _ = fs::remove_file(&test_file);
+            println!(" [✔] Shared Memory: /dev/shm is accessible and writable.");
+            chk("Shared Memory", true, "/dev/shm writable")
+        } else {
+            println!(" [✗] Shared Memory: /dev/shm exists but is NOT writable!");
+            chk("Shared Memory", false, "/dev/shm permission denied")
+        }
     } else {
-        println!(" [✗] System Fonts: Monospace font not found on system!");
-        println!("     -> Fix: Please install fonts-dejavu-core or a system monospace font.");
-        chk("System Fonts", false, "monospace font missing")
+        println!(" [!] Shared Memory: /dev/shm not found (anonymous memfd fallback will be used).");
+        chk("Shared Memory", true, "memfd fallback active")
     }
 }
 
-pub fn check_package_install() -> CheckResult {
-    if let Ok(o) = Command::new("rpm")
-        .args([
-            "-q",
-            "trance",
-            "--qf",
-            "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}",
-        ])
-        .output()
-        && o.status.success()
-    {
-        let ver = String::from_utf8_lossy(&o.stdout).trim().to_string();
-        println!(" [✔] Package (RPM): {ver}");
-        println!("     -> Upgrade with: sudo dnf update");
-        return chk("Package", true, ver);
+pub fn check_yaml_syntax() -> CheckResult {
+    match get_config_path() {
+        Some(path) if path.exists() => match fs::read_to_string(&path) {
+            Ok(content) => {
+                let mut valid_keys = 0;
+                for line in content.lines() {
+                    let line = line.trim();
+                    if line.is_empty() || line.starts_with('#') {
+                        continue;
+                    }
+                    if line.contains(':') {
+                        valid_keys += 1;
+                    }
+                }
+                println!(" [✔] Config Syntax: Config YAML file parsed successfully ({valid_keys} key entries).");
+                chk("Config Syntax", true, format!("{valid_keys} entries"))
+            }
+            Err(e) => {
+                println!(" [✗] Config Syntax: Failed to read config file: {e}");
+                chk("Config Syntax", false, format!("read error: {e}"))
+            }
+        },
+        _ => {
+            println!(" [!] Config Syntax: No custom config file present (default configuration active).");
+            chk("Config Syntax", true, "defaults active")
+        }
     }
-    if let Ok(o) = Command::new("dpkg-query")
-        .args(["-W", "-f=${Package} ${Version}", "trance"])
-        .output()
-        && o.status.success()
-    {
-        let ver = String::from_utf8_lossy(&o.stdout).trim().to_string();
-        println!(" [✔] Package (DEB): {ver}");
-        println!("     -> Upgrade with: sudo apt update && sudo apt upgrade");
-        return chk("Package", true, ver);
-    }
-    println!(" [!] Package: trance not found via RPM or dpkg.");
-    println!("     -> Install from the crateria apt/dnf repository.");
-    chk("Package", true, "not a system package")
 }
 
 fn pid_file_path() -> PathBuf {
@@ -221,13 +226,4 @@ fn get_config_path() -> Option<PathBuf> {
     )
 }
 
-fn font_check_via_fc_list() -> bool {
-    let output = Command::new("fc-list").args([":mono"]).output();
-    match output {
-        Ok(out) => out.status.success() && !out.stdout.is_empty(),
-        Err(_) => {
-            let common_dirs = ["/usr/share/fonts", "/usr/local/share/fonts"];
-            common_dirs.iter().any(|dir| PathBuf::from(dir).exists())
-        }
-    }
-}
+

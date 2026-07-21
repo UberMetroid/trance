@@ -76,6 +76,7 @@ async fn serve(controller: Arc<DaemonController>) -> anyhow::Result<()> {
     ));
 
     tokio::spawn(watchers::watch_external_dbus_inhibits(
+        connection.clone(),
         controller.inhibitors.clone(),
         controller.clone(),
     ));

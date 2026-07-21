@@ -28,6 +28,7 @@ pub fn run_daemon() -> anyhow::Result<()> {
         return Ok(());
     };
     let controller = Arc::new(DaemonController::new(DaemonConfig::load()));
+    crate::config_watcher::start_config_watcher(controller.clone());
     install_signal_handlers(&controller)?;
     log_daemon_startup();
     let dbus_handle = spawn_dbus_thread(Arc::clone(&controller))?;

@@ -2,6 +2,7 @@
 // Copyright 2026 crateria
 
 mod config;
+mod config_watcher;
 mod controller;
 mod daemon;
 mod dbus_server;

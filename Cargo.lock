@@ -5740,6 +5740,7 @@ dependencies = [
  "anyhow",
  "futures-lite",
  "libc",
+ "notify",
  "signal-hook 0.4.4",
  "tokio",
  "tracing",

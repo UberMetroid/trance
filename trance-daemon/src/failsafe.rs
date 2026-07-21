@@ -88,7 +88,7 @@ unsafe extern "C" fn simple_pam_conv(
 }
 
 fn authenticate(user: &str, password: &str) -> bool {
-    let c_service = std::ffi::CString::new("login").unwrap();
+    let pam_services = ["trance", "system-auth", "common-auth", "system-lock", "login"];
     let c_user = std::ffi::CString::new(user).unwrap();
     let c_password = std::ffi::CString::new(password).unwrap();
 
@@ -97,17 +97,22 @@ fn authenticate(user: &str, password: &str) -> bool {
         appdata_ptr: c_password.as_ptr() as *mut libc::c_void,
     };
 
-    let mut pamh: *mut PamHandle = std::ptr::null_mut();
-    unsafe {
-        let res = pam_start(c_service.as_ptr(), c_user.as_ptr(), &conv, &mut pamh);
-        if res != PAM_SUCCESS {
-            return false;
+    for service in pam_services {
+        if let Ok(c_service) = std::ffi::CString::new(service) {
+            let mut pamh: *mut PamHandle = std::ptr::null_mut();
+            unsafe {
+                let res = pam_start(c_service.as_ptr(), c_user.as_ptr(), &conv, &mut pamh);
+                if res == PAM_SUCCESS {
+                    let auth_res = pam_authenticate(pamh, 0);
+                    pam_end(pamh, auth_res);
+                    if auth_res == PAM_SUCCESS {
+                        return true;
+                    }
+                }
+            }
         }
-
-        let auth_res = pam_authenticate(pamh, 0);
-        pam_end(pamh, auth_res);
-        auth_res == PAM_SUCCESS
     }
+    false
 }
 
 fn read_password() -> std::io::Result<String> {
@@ -153,7 +158,7 @@ pub fn run_failsafe_lock() -> anyhow::Result<()> {
             std::env::var("USER").unwrap_or_else(|_| "user".to_string())
         }
     };
-    println!("\x1b[2J\x1b[H"); // Clear screen
+    println!("\x1b[2J\x1b[H");
     println!("============================================================");
     println!("trance: SCREENSAVER RUNNER CRASHED / EXITED UNEXPECTEDLY!");
     println!("SESSION IS LOCKED FOR SECURITY.");
@@ -176,6 +181,12 @@ pub fn run_failsafe_lock() -> anyhow::Result<()> {
     Ok(())
 }
 
+fn which_bin(name: &str) -> bool {
+    std::env::var_os("PATH")
+        .map(|p| std::env::split_paths(&p).any(|dir| dir.join(name).is_file()))
+        .unwrap_or(false)
+}
+
 pub fn spawn_failsafe_locker() -> Result<(), String> {
     let term_emulators = [
         "xterm",
@@ -191,17 +202,7 @@ pub fn spawn_failsafe_locker() -> Result<(), String> {
     let current_exe =
         std::env::current_exe().map_err(|e| format!("failed to get current exe path: {e}"))?;
 
-    let mut term_bin = None;
-    for term in &term_emulators {
-        if std::process::Command::new("which")
-            .arg(term)
-            .output()
-            .is_ok()
-        {
-            term_bin = Some(*term);
-            break;
-        }
-    }
+    let term_bin = term_emulators.into_iter().find(|&term| which_bin(term));
 
     let Some(term) = term_bin else {
         return Err("No terminal emulator found".to_string());

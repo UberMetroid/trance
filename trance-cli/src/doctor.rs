@@ -2,9 +2,11 @@ use anyhow::Result;
 use std::process::Command;
 
 use super::doctor_checks::{
-    CheckResult, check_config_parses, check_dbus, check_fonts, check_package_install,
-    check_running_pid, check_systemd_service, check_wayland,
+    CheckResult, check_config_parses, check_dbus,
+    check_running_pid, check_shm_permissions, check_systemd_service, check_wayland,
+    check_yaml_syntax,
 };
+use super::doctor_sys::{check_fonts, check_package_install};
 
 /// Run diagnostics. When `fix` is true, attempt to reload/enable/restart the
 /// user unit so upgrades do not require remembering systemctl flags.
@@ -24,6 +26,8 @@ pub fn run_doctor(fix: bool) -> Result<()> {
         check_systemd_service(),
         check_running_pid(),
         check_config_parses(),
+        check_yaml_syntax(),
+        check_shm_permissions(),
         check_fonts(),
         check_package_install(),
     ];

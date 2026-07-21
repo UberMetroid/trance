@@ -71,29 +71,37 @@ impl SharedMemory {
     pub fn create(name: &str, size: usize) -> Result<Self, String> {
         let c_name = CString::new(name).map_err(|e| e.to_string())?;
 
-        unsafe {
-            libc::shm_unlink(c_name.as_ptr());
-        }
+        // Attempt anonymous memfd_create (Linux 3.17+) to eliminate named SHM leak risk
+        let mut fd = unsafe { libc::memfd_create(c_name.as_ptr(), libc::MFD_CLOEXEC) };
+        let is_memfd = fd >= 0;
 
-        let fd = unsafe {
-            libc::shm_open(
-                c_name.as_ptr(),
-                libc::O_CREAT | libc::O_RDWR | libc::O_EXCL,
-                0o600,
-            )
-        };
         if fd < 0 {
-            return Err(format!(
-                "shm_open (create) failed: {}",
-                std::io::Error::last_os_error()
-            ));
+            unsafe {
+                libc::shm_unlink(c_name.as_ptr());
+            }
+
+            fd = unsafe {
+                libc::shm_open(
+                    c_name.as_ptr(),
+                    libc::O_CREAT | libc::O_RDWR | libc::O_EXCL,
+                    0o600,
+                )
+            };
+            if fd < 0 {
+                return Err(format!(
+                    "shm_open (create) failed: {}",
+                    std::io::Error::last_os_error()
+                ));
+            }
         }
 
         if unsafe { libc::ftruncate(fd, size as libc::off_t) } < 0 {
             let err = std::io::Error::last_os_error();
             unsafe {
                 libc::close(fd);
-                libc::shm_unlink(c_name.as_ptr());
+                if !is_memfd {
+                    libc::shm_unlink(c_name.as_ptr());
+                }
             }
             return Err(format!("ftruncate failed: {err}"));
         }

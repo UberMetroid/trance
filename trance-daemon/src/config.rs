@@ -37,7 +37,7 @@ impl Default for DaemonConfig {
 }
 
 impl DaemonConfig {
-    fn get_config_path() -> Option<PathBuf> {
+    pub fn get_config_path() -> Option<PathBuf> {
         if let Some(xdg_config) = std::env::var("XDG_CONFIG_HOME")
             .ok()
             .filter(|s| !s.is_empty())

@@ -1,6 +1,6 @@
 [package]
 name = "trance-daemon"
-version = "0.3.63"
+version = "0.3.64"
 edition = "2024"
 description = "Background idle daemon and core package for trance screensavers"
 license = "Apache-2.0"
@@ -26,6 +26,7 @@ zbus = { workspace = true }
 futures-lite = "2.6"
 tokio = { workspace = true }
 anyhow.workspace = true
+notify = "8.2"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 tracing-journald = "0.3.2"

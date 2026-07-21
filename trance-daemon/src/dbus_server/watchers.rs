@@ -47,141 +47,81 @@ pub async fn watch_inhibitor_clients(
 }
 
 pub async fn watch_external_dbus_inhibits(
+    connection: zbus::Connection,
     inhibitors: Arc<InhibitorState>,
     controller: Arc<DaemonController>,
 ) {
-    use tokio::io::AsyncBufReadExt;
+    use zbus::MatchRule;
+    use zbus::message::Type;
 
-    loop {
-        tracing::info!("Starting external D-Bus inhibitor monitor...");
-        let mut child = match tokio::process::Command::new("dbus-monitor")
-            .args([
-                "type='method_call',interface='org.freedesktop.ScreenSaver'",
-                "type='method_return'",
-            ])
-            .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-        {
-            Ok(child) => child,
-            Err(error) => {
-                tracing::error!("Failed to spawn dbus-monitor: {error}. Retrying in 5 seconds...");
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-                continue;
-            }
-        };
+    let Ok(builder_fd) = MatchRule::builder()
+        .msg_type(Type::MethodCall)
+        .interface("org.freedesktop.ScreenSaver") else { return; };
+    let rule_fd = builder_fd.build();
 
-        let stdout = child.stdout.take().unwrap();
-        let mut reader = tokio::io::BufReader::new(stdout).lines();
+    let Ok(builder_gnome) = MatchRule::builder()
+        .msg_type(Type::MethodCall)
+        .interface("org.gnome.ScreenSaver") else { return; };
+    let rule_gnome = builder_gnome.build();
 
-        let mut pending_inhibits: std::collections::HashMap<u32, (String, String, String)> =
-            std::collections::HashMap::new();
-        let mut current_member: Option<String> = None;
-        let mut current_sender: Option<String> = None;
-        let mut current_serial: Option<u32> = None;
-        let mut current_reply_serial: Option<u32> = None;
-        let mut app_name: Option<String> = None;
-
-        while let Ok(Some(line)) = reader.next_line().await {
-            let line = line.trim();
-            if line.starts_with("method call ") {
-                current_member = None;
-                current_sender = None;
-                current_serial = None;
-                current_reply_serial = None;
-                app_name = None;
-
-                if line.contains("interface=org.freedesktop.ScreenSaver")
-                    && let Some(sender_part) = extract_field(line, "sender=")
-                    && let Some(serial_part) = extract_field(line, "serial=")
-                    && let Ok(serial) = serial_part.parse::<u32>()
-                {
-                    current_sender = Some(sender_part);
-                    current_serial = Some(serial);
-                    if line.contains("member=Inhibit") {
-                        current_member = Some("Inhibit".to_string());
-                    } else if line.contains("member=UnInhibit") {
-                        current_member = Some("UnInhibit".to_string());
-                    }
-                }
-            } else if line.starts_with("method return ") {
-                current_member = None;
-                current_sender = None;
-                current_serial = None;
-                current_reply_serial = None;
-                app_name = None;
-
-                if let Some(reply_serial_part) = extract_field(line, "reply_serial=")
-                    && let Ok(reply_serial) = reply_serial_part.parse::<u32>()
-                {
-                    current_reply_serial = Some(reply_serial);
-                }
-            } else if let Some(stripped) = line.strip_prefix("string ") {
-                if !stripped.is_empty() {
-                    let val = stripped.trim_matches('"').to_string();
-                    if let Some(member) = &current_member
-                        && member == "Inhibit"
-                    {
-                        if app_name.is_none() {
-                            app_name = Some(val);
-                        } else {
-                            if let (Some(sender), Some(serial), Some(app)) =
-                                (&current_sender, current_serial, app_name.take())
-                            {
-                                pending_inhibits.insert(serial, (sender.clone(), app, val));
-                            }
-                            current_member = None;
-                        }
-                    }
-                }
-            } else if let Some(stripped) = line.strip_prefix("uint32 ")
-                && let Ok(cookie) = stripped.trim().parse::<u32>()
-            {
-                if let Some(member) = &current_member {
-                    if member == "UnInhibit" {
-                        if let Some(sender) = &current_sender
-                            && let Ok(client_name) =
-                                zbus::names::UniqueName::try_from(sender.as_str())
-                        {
-                            tracing::info!(
-                                "Removing external inhibitor for client {} (cookie {})",
-                                client_name,
-                                cookie
-                            );
-                            inhibitors.remove_for_client(cookie, &client_name);
-                            controller.mark_dirty();
-                        }
-                        current_member = None;
-                    }
-                } else if let Some(reply_serial) = current_reply_serial {
-                    if let Some((sender, app, reason)) = pending_inhibits.remove(&reply_serial)
-                        && let Ok(client_name) = zbus::names::UniqueName::try_from(sender.as_str())
-                    {
-                        inhibitors.add_with_cookie(app, reason, client_name.to_owned(), cookie);
-                        controller.mark_dirty();
-                    }
-                    current_reply_serial = None;
-                }
-            }
+    let stream = match zbus::MessageStream::for_match_rule(rule_fd, &connection, None).await {
+        Ok(s) => s,
+        Err(err) => {
+            tracing::error!("Failed to subscribe to org.freedesktop.ScreenSaver match rule: {err}");
+            return;
         }
+    };
 
-        tracing::warn!("dbus-monitor exited. Restarting in 5 seconds...");
-        let _ = child.kill().await;
-        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    if let Ok(gnome_stream) = zbus::MessageStream::for_match_rule(rule_gnome, &connection, None).await {
+        tokio::spawn(process_message_stream(gnome_stream, inhibitors.clone(), controller.clone()));
     }
+
+    process_message_stream(stream, inhibitors, controller).await;
 }
 
-fn extract_field(line: &str, prefix: &str) -> Option<String> {
-    if let Some(pos) = line.find(prefix) {
-        let start = pos + prefix.len();
-        let rest = &line[start..];
-        let end = rest.find(|c: char| c.is_whitespace() || c == ';' || c == ',');
-        let val = match end {
-            Some(e) => &rest[..e],
-            None => rest,
+async fn process_message_stream(
+    mut stream: zbus::MessageStream,
+    inhibitors: Arc<InhibitorState>,
+    controller: Arc<DaemonController>,
+) {
+    let mut next_cookie: u32 = 10000;
+
+    while let Some(Ok(msg)) = stream.next().await {
+        let header = msg.header();
+        let member = match header.member() {
+            Some(m) => m.as_str(),
+            None => continue,
         };
-        Some(val.trim_matches('"').to_string())
-    } else {
-        None
+
+        let sender = match header.sender() {
+            Some(s) => s.to_owned(),
+            None => continue,
+        };
+
+        match member {
+            "Inhibit" => {
+                if let Ok((app, reason)) = msg.body().deserialize::<(String, String)>() {
+                    let cookie = next_cookie;
+                    next_cookie = next_cookie.wrapping_add(1);
+                    tracing::info!(
+                        "External inhibitor added for client {} ({}: {}) -> cookie {}",
+                        sender, app, reason, cookie
+                    );
+                    inhibitors.add_with_cookie(app, reason, sender, cookie);
+                    controller.mark_dirty();
+                }
+            }
+            "UnInhibit" => {
+                if let Ok(cookie) = msg.body().deserialize::<u32>() {
+                    tracing::info!(
+                        "External inhibitor removed for client {} (cookie {})",
+                        sender, cookie
+                    );
+                    inhibitors.remove_for_client(cookie, &sender);
+                    controller.mark_dirty();
+                }
+            }
+            _ => {}
+        }
     }
 }
