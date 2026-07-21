@@ -187,7 +187,9 @@ pub fn check_yaml_syntax() -> CheckResult {
                         valid_keys += 1;
                     }
                 }
-                println!(" [✔] Config Syntax: Config YAML file parsed successfully ({valid_keys} key entries).");
+                println!(
+                    " [✔] Config Syntax: Config YAML file parsed successfully ({valid_keys} key entries)."
+                );
                 chk("Config Syntax", true, format!("{valid_keys} entries"))
             }
             Err(e) => {
@@ -196,7 +198,9 @@ pub fn check_yaml_syntax() -> CheckResult {
             }
         },
         _ => {
-            println!(" [!] Config Syntax: No custom config file present (default configuration active).");
+            println!(
+                " [!] Config Syntax: No custom config file present (default configuration active)."
+            );
             chk("Config Syntax", true, "defaults active")
         }
     }
@@ -225,5 +229,3 @@ fn get_config_path() -> Option<PathBuf> {
             .join("config.yaml"),
     )
 }
-
-

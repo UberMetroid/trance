@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+use super::doctor_checks::{CheckResult, chk};
 use std::path::PathBuf;
 use std::process::Command;
-use super::doctor_checks::{CheckResult, chk};
 
 pub fn check_fonts() -> CheckResult {
     if font_check_via_fc_list() {

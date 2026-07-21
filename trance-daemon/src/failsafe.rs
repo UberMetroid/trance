@@ -88,7 +88,13 @@ unsafe extern "C" fn simple_pam_conv(
 }
 
 fn authenticate(user: &str, password: &str) -> bool {
-    let pam_services = ["trance", "system-auth", "common-auth", "system-lock", "login"];
+    let pam_services = [
+        "trance",
+        "system-auth",
+        "common-auth",
+        "system-lock",
+        "login",
+    ];
     let c_user = std::ffi::CString::new(user).unwrap();
     let c_password = std::ffi::CString::new(password).unwrap();
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+use notify::{Event, EventKind, RecursiveMode, Watcher};
 use std::sync::Arc;
 use std::time::Duration;
-use notify::{Event, EventKind, RecursiveMode, Watcher};
 
 use crate::config::DaemonConfig;
 use crate::controller::DaemonController;
@@ -23,16 +23,15 @@ pub fn start_config_watcher(controller: Arc<DaemonController>) {
     let target_path = path.clone();
 
     let mut watcher = match notify::recommended_watcher(move |res: Result<Event, _>| {
-        if let Ok(event) = res {
-            if matches!(event.kind, EventKind::Modify(_) | EventKind::Create(_))
-                && event.paths.iter().any(|p| p == &target_path)
-            {
-                tracing::info!("Config file modified on disk; hot-reloading settings...");
-                let fresh = DaemonConfig::load();
-                let _ = controller_clone.mutate_config(|cfg| {
-                    *cfg = fresh;
-                });
-            }
+        if let Ok(event) = res
+            && matches!(event.kind, EventKind::Modify(_) | EventKind::Create(_))
+            && event.paths.iter().any(|p| p == &target_path)
+        {
+            tracing::info!("Config file modified on disk; hot-reloading settings...");
+            let fresh = DaemonConfig::load();
+            let _ = controller_clone.mutate_config(|cfg| {
+                *cfg = fresh;
+            });
         }
     }) {
         Ok(w) => w,
@@ -50,7 +49,7 @@ pub fn start_config_watcher(controller: Arc<DaemonController>) {
     tokio::spawn(async move {
         let _watcher = watcher;
         loop {
-            tokio::time::sleep(Duration::from_secs(3600)).await;
+            tokio::time::sleep(Duration::from_hours(1)).await;
         }
     });
 }

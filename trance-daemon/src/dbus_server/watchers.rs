@@ -56,12 +56,18 @@ pub async fn watch_external_dbus_inhibits(
 
     let Ok(builder_fd) = MatchRule::builder()
         .msg_type(Type::MethodCall)
-        .interface("org.freedesktop.ScreenSaver") else { return; };
+        .interface("org.freedesktop.ScreenSaver")
+    else {
+        return;
+    };
     let rule_fd = builder_fd.build();
 
     let Ok(builder_gnome) = MatchRule::builder()
         .msg_type(Type::MethodCall)
-        .interface("org.gnome.ScreenSaver") else { return; };
+        .interface("org.gnome.ScreenSaver")
+    else {
+        return;
+    };
     let rule_gnome = builder_gnome.build();
 
     let stream = match zbus::MessageStream::for_match_rule(rule_fd, &connection, None).await {
@@ -72,8 +78,14 @@ pub async fn watch_external_dbus_inhibits(
         }
     };
 
-    if let Ok(gnome_stream) = zbus::MessageStream::for_match_rule(rule_gnome, &connection, None).await {
-        tokio::spawn(process_message_stream(gnome_stream, inhibitors.clone(), controller.clone()));
+    if let Ok(gnome_stream) =
+        zbus::MessageStream::for_match_rule(rule_gnome, &connection, None).await
+    {
+        tokio::spawn(process_message_stream(
+            gnome_stream,
+            inhibitors.clone(),
+            controller.clone(),
+        ));
     }
 
     process_message_stream(stream, inhibitors, controller).await;
@@ -105,7 +117,10 @@ async fn process_message_stream(
                     next_cookie = next_cookie.wrapping_add(1);
                     tracing::info!(
                         "External inhibitor added for client {} ({}: {}) -> cookie {}",
-                        sender, app, reason, cookie
+                        sender,
+                        app,
+                        reason,
+                        cookie
                     );
                     inhibitors.add_with_cookie(app, reason, sender, cookie);
                     controller.mark_dirty();
@@ -115,7 +130,8 @@ async fn process_message_stream(
                 if let Ok(cookie) = msg.body().deserialize::<u32>() {
                     tracing::info!(
                         "External inhibitor removed for client {} (cookie {})",
-                        sender, cookie
+                        sender,
+                        cookie
                     );
                     inhibitors.remove_for_client(cookie, &sender);
                     controller.mark_dirty();
