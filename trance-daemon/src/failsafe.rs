@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-use std::io::Write;
 use libloading::Library;
+use std::io::Write;
 
 #[repr(C)]
 pub struct PamHandle {
@@ -93,10 +93,11 @@ fn authenticate(user: &str, password: &str) -> bool {
         Ok(s) => s,
         Err(_) => return false,
     };
-    let pam_authenticate: libloading::Symbol<FnPamAuth> = match unsafe { lib.get(b"pam_authenticate\0") } {
-        Ok(s) => s,
-        Err(_) => return false,
-    };
+    let pam_authenticate: libloading::Symbol<FnPamAuth> =
+        match unsafe { lib.get(b"pam_authenticate\0") } {
+            Ok(s) => s,
+            Err(_) => return false,
+        };
     let pam_end: libloading::Symbol<FnPamEnd> = match unsafe { lib.get(b"pam_end\0") } {
         Ok(s) => s,
         Err(_) => return false,
