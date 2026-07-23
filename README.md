@@ -10,7 +10,7 @@ Modular Wayland-native screensaver and ambient display daemon for Linux, written
 | | |
 |---|---|
 | Brand | [idlescreen/brand](https://github.com/idlescreen/idle-brand) |
-| Packages | [idlescreen.github.io/idle-packages](https://idlescreen.github.io/idle-packages/) |
+| Packages | [idlescreen.github.io/packages](https://idlescreen.github.io/packages/) |
 | Org | [idlescreen](https://github.com/idlescreen) |
 | Plugins | [official plugins](https://github.com/orgs/idlescreen/repositories?q=saver-) |
 | Optional applet | [idlescreen/idlescreen-applet](https://github.com/idlescreen/idle-core-applet) |
@@ -21,9 +21,9 @@ Modular Wayland-native screensaver and ambient display daemon for Linux, written
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
-sudo curl -fsSL https://idlescreen.github.io/idle-packages/apt/crateria-keyring.gpg \
+sudo curl -fsSL https://idlescreen.github.io/packages/apt/crateria-keyring.gpg \
   -o /etc/apt/keyrings/idlescreen.gpg
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/idlescreen.gpg] https://idlescreen.github.io/idle-packages/apt stable main" \
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/idlescreen.gpg] https://idlescreen.github.io/packages/apt stable main" \
   | sudo tee /etc/apt/sources.list.d/idlescreen.list
 sudo apt update && sudo apt install trance
 ```
@@ -31,7 +31,7 @@ sudo apt update && sudo apt install trance
 ### Fedora
 
 ```bash
-sudo curl -fsSL https://idlescreen.github.io/idle-packages/rpm/crateria.repo \
+sudo curl -fsSL https://idlescreen.github.io/packages/rpm/crateria.repo \
   -o /etc/yum.repos.d/idlescreen.repo
 sudo dnf install trance
 ```
@@ -71,7 +71,7 @@ containerized tooling. Desktop install prefers native packages.
 1. Tag `vX.Y.Z` on `master`.
 2. The Release workflow builds `.deb` / `.rpm` assets and publishes a GitHub Release.
 3. When `IDLESCREEN_PACKAGES_DISPATCH_TOKEN` is set, the workflow sends
-   `repository_dispatch` `new_release` to [idlescreen/packages](https://github.com/idlescreen/idle-packages)
+   `repository_dispatch` `new_release` to [idlescreen/packages](https://github.com/idlescreen/packages)
    for signing and Pages index update.
 
 ## Environment configuration
