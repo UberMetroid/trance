@@ -1,11 +1,6 @@
 use super::*;
 
-fn bounds(
-    start_col: usize,
-    end_col: usize,
-    start_row: usize,
-    end_row: usize,
-) -> MonitorCellBounds {
+fn bounds(start_col: usize, end_col: usize, start_row: usize, end_row: usize) -> MonitorCellBounds {
     MonitorCellBounds {
         start_col,
         end_col,
