@@ -4,7 +4,7 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
   <vendor>crateria</vendor>
-  <vendor_url>https://github.com/idlescreen/trance</vendor_url>
+  <vendor_url>https://github.com/idlescreen/idlescreen</vendor_url>
 
   <action id="io.github.ubermetroid.trance.configure">
     <description>Modify Trance screensaver configuration</description>
