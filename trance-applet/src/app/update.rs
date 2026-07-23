@@ -118,7 +118,7 @@ impl AppModel {
                             .max_height(1080.0);
                         get_popup(popup_settings)
                     } else {
-                        Command::none()
+                        Task::none()
                     }
                 };
             }
