@@ -1,27 +1,25 @@
-<h1 align="center">
-  <img src="assets/icon.png" width="48" height="48" valign="middle" alt=""> Trance
-</h1>
+# IdleScreen
 
-<p align="center">
-  <b>Modular Wayland-native screensaver and ambient display daemon for Linux, written in Rust.</b>
-</p>
+[![CI](https://github.com/idlescreen/idlescreen/actions/workflows/ci.yml/badge.svg)](https://github.com/idlescreen/idlescreen/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/security-private%20reporting-blue)](https://github.com/idlescreen/idlescreen/security/advisories)
 
-<p align="center">
-  Part of <a href="https://github.com/idlescreen">IdleScreen</a>
-  · Brand: <a href="https://github.com/idlescreen/brand">idlescreen/brand</a>
-  · Packages: <a href="https://idlescreen.github.io/packages/">idlescreen.github.io/packages</a>
-</p>
+Modular Wayland-native screensaver and ambient display daemon for Linux, written in Rust.
 
-<p align="center">
-  <a href="https://github.com/idlescreen/idlescreen/actions/workflows/ci.yml"><img src="https://github.com/idlescreen/idlescreen/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/idlescreen/idlescreen/security/advisories"><img src="https://img.shields.io/badge/security-private%20reporting-blue" alt="Security"></a>
-</p>
+| | |
+|---|---|
+| Brand | [idlescreen/brand](https://github.com/idlescreen/brand) |
+| Packages | [idlescreen.github.io/packages](https://idlescreen.github.io/packages/) |
+| Org | [idlescreen](https://github.com/idlescreen) |
+| Plugins | [idlescreen plugins](https://github.com/orgs/idlescreen/repositories?q=plugin-) |
+| Optional applet | [idlescreen/idlescreen-applet](https://github.com/idlescreen/idlescreen-applet) |
+
+**Package and crate names remain `trance` / `trance-*` for API and install stability.** The product brand and GitHub org are IdleScreen; binary and Debian package name `trance` is intentional.
 
 ---
 
-### Install (native packages)
+## Install (native packages)
 
-**Debian / Ubuntu / Pop!_OS:**
+### Debian / Ubuntu / Pop!_OS
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
@@ -32,7 +30,7 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/idlescreen.gpg] https://idlesc
 sudo apt update && sudo apt install trance
 ```
 
-**Fedora:**
+### Fedora
 
 ```bash
 sudo curl -fsSL https://idlescreen.github.io/packages/rpm/crateria.repo \
@@ -40,14 +38,16 @@ sudo curl -fsSL https://idlescreen.github.io/packages/rpm/crateria.repo \
 sudo dnf install trance
 ```
 
-> Keyring/repo filenames on the server may still say `crateria-*` until rebranded; host is **idlescreen.github.io**.
+Keyring and repo drop-in filenames on the package host may still use a `crateria-*` prefix for compatibility; the public host is **idlescreen.github.io**.
+
+Optional: `trance-plugins-all`, `trance-cli`, `trance-tui`. COSMIC panel users can install [idlescreen-applet](https://github.com/idlescreen/idlescreen-applet) separately.
 
 Package index: [idlescreen.github.io/packages](https://idlescreen.github.io/packages/)  
 Official plugins: [org plugin repositories](https://github.com/orgs/idlescreen/repositories?q=plugin-)
 
 ---
 
-### Build from source
+## Build from source
 
 ```bash
 git clone https://github.com/idlescreen/idlescreen.git
@@ -55,17 +55,29 @@ cd idlescreen
 cargo build --release -p trance-daemon -p trance-cli -p trance-tui
 ```
 
-System deps (Debian/Ubuntu): `libdbus-1-dev libwayland-dev libxkbcommon-dev libssl-dev libpam0g-dev pkg-config`
+System dependencies (Debian/Ubuntu): `libdbus-1-dev libwayland-dev libxkbcommon-dev libssl-dev libpam0g-dev pkg-config`
+
+Checks (mirrors CI on `master`):
+
+```bash
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test -p trance-api -p trance-dbus -p trance-ipc -p trance-daemon
+```
+
+An optional multi-stage Alpine `Dockerfile` builds release binaries for containerized tooling; desktop install prefers native packages, not containers.
 
 ---
 
-### Releases
+## Releases
 
-Tag `vX.Y.Z` on `master` → release workflow builds packages and may dispatch **idlescreen/packages** (secret: `IDLESCREEN_PACKAGES_DISPATCH_TOKEN`).
+1. Tag `vX.Y.Z` on `master`.
+2. The Release workflow builds `.deb` / `.rpm` assets and publishes a GitHub Release.
+3. When `IDLESCREEN_PACKAGES_DISPATCH_TOKEN` is set, the workflow sends `repository_dispatch` `new_release` to [idlescreen/packages](https://github.com/idlescreen/packages) for signing and Pages index update.
 
 ---
 
-### Environment configuration
+## Environment configuration
 
 | Variable | Description | Default |
 | :--- | :--- | :---: |
@@ -76,7 +88,7 @@ Tag `vX.Y.Z` on `master` → release workflow builds packages and may dispatch *
 
 ---
 
-### Administration CLI
+## Administration CLI
 
 ```bash
 trance-cli status
@@ -84,30 +96,27 @@ trance-cli enable | disable
 trance-cli preview <plugin>
 ```
 
----
-
-### Security
-
-[Private vulnerability reporting](https://github.com/idlescreen/idlescreen/security/advisories/new) · [SECURITY.md](https://github.com/idlescreen/.github/blob/main/SECURITY.md) (when published)
+Binary name is `trance` for the CLI package on some installs; `trance-cli` is the cargo package name.
 
 ---
 
-### License
+## Architecture
+
+- Wayland idle and session lock protocols (`ext-idle-notify-v1`, `ext-session-lock-v1`)
+- wgpu cell rendering; PAM-backed failsafe lock path
+- Out-of-process plugins over UDS + POSIX shared memory with Landlock sandboxing
+- Official effects live as separate `plugin-*` repositories under the IdleScreen org
+
+D-Bus well-known names and object paths retain historical identifiers for ABI stability; they are not brand surface.
+
+---
+
+## Security
+
+Please use [private vulnerability reporting](https://github.com/idlescreen/idlescreen/security/advisories/new) (do not file public issues for sensitive bugs).
+
+---
+
+## License
 
 Apache-2.0. See [LICENSE](LICENSE).
-
----
-
-### Official plugins
-
-Plugins are also published as standalone repositories:
-
-https://github.com/orgs/idlescreen/repositories?q=plugin-
-
----
-
-### COSMIC applet (optional)
-
-Panel integration for System76 COSMIC is maintained separately:
-
-https://github.com/idlescreen/idlescreen-applet
