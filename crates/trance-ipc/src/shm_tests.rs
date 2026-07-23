@@ -15,12 +15,17 @@ fn shm_name_rejects_traversal_and_oddities() {
     assert!(!is_valid_shm_name("/trance-shm-../etc"));
     assert!(!is_valid_shm_name("/trance-shm-"));
     assert!(!is_valid_shm_name("/trance-shm-a/b"));
-    assert!(!is_valid_shm_name(&format!("/trance-shm-{}", "x".repeat(80))));
+    assert!(!is_valid_shm_name(&format!(
+        "/trance-shm-{}",
+        "x".repeat(80)
+    )));
 }
 
 #[test]
 fn socket_path_rejects_relative_and_dots() {
-    assert!(is_plausible_socket_path("/run/user/1000/trance-uds-1-0.sock"));
+    assert!(is_plausible_socket_path(
+        "/run/user/1000/trance-uds-1-0.sock"
+    ));
     assert!(!is_plausible_socket_path("relative.sock"));
     assert!(!is_plausible_socket_path("/tmp/../etc/passwd.sock"));
     assert!(!is_plausible_socket_path("/tmp/foo"));

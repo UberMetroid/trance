@@ -32,10 +32,10 @@ pub fn run_ipc_runner(
         return Err(format!("invalid shm name: {shm_name}"));
     }
     validate_grid_dims(cols, rows).map_err(|e| e.to_string())?;
-    if let Some(scale) = render_scale {
-        if !scale.is_finite() || !(0.0..=1.0).contains(&scale) {
-            return Err(format!("render_scale out of range: {scale}"));
-        }
+    if let Some(scale) = render_scale
+        && (!scale.is_finite() || !(0.0..=1.0).contains(&scale))
+    {
+        return Err(format!("render_scale out of range: {scale}"));
     }
 
     tracing::info!(
@@ -179,9 +179,16 @@ mod tests {
 
     #[test]
     fn rejects_relative_socket() {
-        let err =
-            run_ipc_runner("beams", "relative.sock", "/trance-shm-1-0", 80, 24, false, None)
-                .unwrap_err();
+        let err = run_ipc_runner(
+            "beams",
+            "relative.sock",
+            "/trance-shm-1-0",
+            80,
+            24,
+            false,
+            None,
+        )
+        .unwrap_err();
         assert!(err.contains("socket"));
     }
 
