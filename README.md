@@ -43,7 +43,7 @@ sudo dnf install trance
 > Keyring/repo filenames on the server may still say `crateria-*` until rebranded; host is **idlescreen.github.io**.
 
 Package index: [idlescreen.github.io/packages](https://idlescreen.github.io/packages/)  
-Official plugins: [idlescreen/trance-plugins](https://github.com/idlescreen/idlescreen-plugins)
+Official plugins: [org plugin repositories](https://github.com/orgs/idlescreen/repositories?q=plugin-)
 
 ---
 
@@ -51,7 +51,7 @@ Official plugins: [idlescreen/trance-plugins](https://github.com/idlescreen/idle
 
 ```bash
 git clone https://github.com/idlescreen/idlescreen.git
-cd trance
+cd idlescreen
 cargo build --release -p trance-daemon -p trance-cli -p trance-tui
 ```
 
