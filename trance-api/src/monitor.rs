@@ -68,14 +68,21 @@ pub fn get_primary_monitor_bounds(cols: usize, rows: usize) -> MonitorCellBounds
     }
 }
 
-static ENV_PRIMARY_BOUNDS: OnceLock<Mutex<Option<MonitorCellBounds>>> = OnceLock::new();
+use std::sync::RwLock;
 
-fn env_bounds_cache() -> &'static Mutex<Option<MonitorCellBounds>> {
-    ENV_PRIMARY_BOUNDS.get_or_init(|| Mutex::new(None))
+static ENV_PRIMARY_BOUNDS: OnceLock<RwLock<Option<MonitorCellBounds>>> = OnceLock::new();
+
+fn env_bounds_cache() -> &'static RwLock<Option<MonitorCellBounds>> {
+    ENV_PRIMARY_BOUNDS.get_or_init(|| RwLock::new(None))
 }
 
 fn cached_primary_bounds_from_env() -> Option<MonitorCellBounds> {
-    let mut cache = env_bounds_cache().lock().unwrap_or_else(|e| e.into_inner());
+    if let Ok(read_guard) = env_bounds_cache().read() {
+        if let Some(bounds) = *read_guard {
+            return Some(bounds);
+        }
+    }
+    let mut cache = env_bounds_cache().write().unwrap_or_else(|e| e.into_inner());
     if cache.is_none() {
         *cache = read_primary_bounds_from_env();
     }
@@ -122,7 +129,7 @@ pub fn publish_primary_bounds(bounds: MonitorCellBounds) {
         std::env::set_var("TRANCE_PRIMARY_START_ROW", bounds.start_row.to_string());
         std::env::set_var("TRANCE_PRIMARY_END_ROW", bounds.end_row.to_string());
     }
-    *env_bounds_cache().lock().unwrap_or_else(|e| e.into_inner()) = Some(bounds);
+    *env_bounds_cache().write().unwrap_or_else(|e| e.into_inner()) = Some(bounds);
 }
 
 pub fn clear_primary_bounds() {
@@ -133,7 +140,7 @@ pub fn clear_primary_bounds() {
         std::env::remove_var("TRANCE_PRIMARY_START_ROW");
         std::env::remove_var("TRANCE_PRIMARY_END_ROW");
     }
-    *env_bounds_cache().lock().unwrap_or_else(|e| e.into_inner()) = None;
+    *env_bounds_cache().write().unwrap_or_else(|e| e.into_inner()) = None;
 }
 
 pub fn is_secondary_monitor() -> bool {

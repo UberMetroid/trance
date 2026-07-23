@@ -1,18 +1,27 @@
 // SPDX-License-Identifier: MIT
 
-use std::sync::Mutex;
 use std::sync::OnceLock;
+use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
 use trance_api::MonitorCellBounds;
 
 type MonitorLayoutCacheEntry = (Vec<MonitorCellBounds>, (usize, usize), Instant);
 
-static MONITOR_LAYOUT_CACHE: OnceLock<Mutex<Option<MonitorLayoutCacheEntry>>> = OnceLock::new();
+static MONITOR_LAYOUT_CACHE: OnceLock<RwLock<Option<MonitorLayoutCacheEntry>>> = OnceLock::new();
 
 pub fn get_monitor_layouts(cols: usize, rows: usize) -> Vec<MonitorCellBounds> {
-    let cache_mutex = MONITOR_LAYOUT_CACHE.get_or_init(|| Mutex::new(None));
-    let mut cache = cache_mutex.lock().unwrap_or_else(|e| e.into_inner());
+    let cache_rw = MONITOR_LAYOUT_CACHE.get_or_init(|| RwLock::new(None));
+    if let Ok(read_guard) = cache_rw.read() {
+        if let Some((ref layouts, (cached_cols, cached_rows), last_query)) = *read_guard
+            && cached_cols == cols
+            && cached_rows == rows
+            && last_query.elapsed() < Duration::from_secs(5)
+        {
+            return layouts.clone();
+        }
+    }
+    let mut cache = cache_rw.write().unwrap_or_else(|e| e.into_inner());
     if let Some((ref layouts, (cached_cols, cached_rows), last_query)) = *cache
         && cached_cols == cols
         && cached_rows == rows
