@@ -37,6 +37,8 @@ fn apply_idle_timeout(config: &mut DaemonConfig, val: &str) {
 fn apply_active_saver(config: &mut DaemonConfig, val: &str) {
     if val.is_empty() || val == "none" {
         config.active_saver = None;
+    } else if val == "random" || val == "shuffle" {
+        config.active_saver = Some(val.to_string());
     } else if is_allowed_saver(val) {
         config.active_saver = sanitize_saver_name(val).map(|s| s.to_string());
     }
@@ -64,16 +66,30 @@ fn apply_render_scale(config: &mut DaemonConfig, val: &str) {
     }
 }
 
-/// Parse one non-comment config line (`key: value`) into the config.
-pub(crate) fn apply_config_line(config: &mut DaemonConfig, line: &str) {
+/// Parse one non-comment config line (`key: value` or `[section]`) into the config.
+pub(crate) fn apply_config_line(config: &mut DaemonConfig, current_section: &mut String, line: &str) {
     let line = line.trim();
     if line.is_empty() || line.starts_with('#') {
         return;
     }
+    
+    if line.starts_with('[') && line.ends_with(']') {
+        *current_section = line[1..line.len() - 1].to_string();
+        return;
+    }
+    
     let Some(idx) = line.find(':') else {
         return;
     };
     let key = line[..idx].trim();
     let val = line[idx + 1..].trim().trim_matches('"').trim_matches('\'');
-    apply_config_key(config, key, val);
+    
+    if current_section == "saver" {
+        config.saver_params.insert(key.to_string(), val.to_string());
+    } else if current_section.starts_with("saver.") {
+        let full_key = format!("{}.{}", &current_section[6..], key);
+        config.saver_params.insert(full_key, val.to_string());
+    } else {
+        apply_config_key(config, key, val);
+    }
 }

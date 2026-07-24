@@ -22,6 +22,8 @@ pub struct DaemonConfig {
     /// Simulation grid scale override in `(0.25, 1.0]`; `None` uses CPU
     /// defaults (the GPU path was removed in 2026).
     pub render_scale: Option<f32>,
+    /// Per-saver custom parameters (e.g. speed, density)
+    pub saver_params: std::collections::BTreeMap<String, String>,
 }
 
 impl Default for DaemonConfig {
@@ -33,6 +35,7 @@ impl Default for DaemonConfig {
             gpu_enabled: false,
             show_fps_overlay: false,
             render_scale: None,
+            saver_params: std::collections::BTreeMap::new(),
         }
     }
 }
@@ -97,8 +100,9 @@ impl DaemonConfig {
     pub fn load() -> Self {
         let mut config = Self::default();
         if let Some(Ok(content)) = Self::resolve_config_path().map(fs::read_to_string) {
+            let mut current_section = String::new();
             for line in content.lines() {
-                apply_config_line(&mut config, line);
+                apply_config_line(&mut config, &mut current_section, line);
             }
         }
         config
@@ -113,7 +117,7 @@ impl DaemonConfig {
             .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "no parent dir"))?;
         fs::create_dir_all(parent)?;
         let active_str = self.active_saver.as_deref().unwrap_or("none");
-        let content = format!(
+        let mut content = format!(
             "# trance themes and settings\n\
              accent_color: \"#00BFFF\"\n\
              # dark_mode is auto-detected from system\n\
@@ -132,6 +136,13 @@ impl DaemonConfig {
                 .map(|s| s.to_string())
                 .unwrap_or_else(|| "null".to_string())
         );
+
+        if !self.saver_params.is_empty() {
+            content.push_str("\n[saver]\n");
+            for (k, v) in &self.saver_params {
+                content.push_str(&format!("{}: {}\n", k, v));
+            }
+        }
         static TMP_COUNTER: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
         let count = TMP_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let tmp_path = parent.join(format!("config.tmp.{}.{}", std::process::id(), count));

@@ -75,6 +75,27 @@ pub fn check_running_pid() -> CheckResult {
     }
 }
 
+pub fn check_inhibitor() -> CheckResult {
+    if let Ok(client) = TranceClient::connect() {
+        if let Ok(status) = client.get_status() {
+            if status.inhibited {
+                return chk(
+                    "Inhibitor Status",
+                    true,
+                    "INHIBITED (app or system is currently suppressing idle)",
+                );
+            } else {
+                return chk(
+                    "Inhibitor Status",
+                    true,
+                    "uninhibited (idle triggers normally)",
+                );
+            }
+        }
+    }
+    chk("Inhibitor Status", true, "idle daemon not connected")
+}
+
 fn pid_file_path() -> PathBuf {
     if let Ok(runtime_dir) = std::env::var("XDG_RUNTIME_DIR") {
         PathBuf::from(runtime_dir).join("idle-daemon.pid")

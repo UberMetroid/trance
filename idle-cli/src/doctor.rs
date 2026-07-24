@@ -4,7 +4,7 @@ use std::process::Command;
 use super::doctor_checks::CheckResult;
 use super::doctor_env::{check_protocol_hints, check_wayland};
 use super::doctor_fs::{check_config_parses, check_shm_permissions, check_yaml_syntax};
-use super::doctor_service::{check_dbus, check_running_pid, check_systemd_service};
+use super::doctor_service::{check_dbus, check_inhibitor, check_running_pid, check_systemd_service};
 use super::doctor_sys::{check_fonts, check_package_install};
 
 /// Run diagnostics. When `fix` is true, attempt to reload/enable/restart the
@@ -25,6 +25,7 @@ pub fn run_doctor(fix: bool, json: bool) -> Result<()> {
         check_dbus(),
         check_systemd_service(),
         check_running_pid(),
+        check_inhibitor(),
         check_config_parses(),
         check_yaml_syntax(),
         check_shm_permissions(),
@@ -54,6 +55,10 @@ pub fn run_doctor(fix: bool, json: bool) -> Result<()> {
 }
 
 fn fix_user_service_quiet() -> Result<()> {
+    if let Ok(home) = std::env::var("HOME") {
+        let config_dir = std::path::PathBuf::from(home).join(".config").join("idle");
+        let _ = std::fs::create_dir_all(&config_dir);
+    }
     let _ = Command::new("systemctl")
         .args(["--user", "daemon-reload"])
         .status();
@@ -71,6 +76,15 @@ fn fix_user_service_quiet() -> Result<()> {
 /// Best-effort recovery after package upgrade or a dead session service.
 fn fix_user_service() -> Result<()> {
     println!("--fix: reloading and ensuring idle-daemon user service...");
+
+    if let Ok(home) = std::env::var("HOME") {
+        let config_dir = std::path::PathBuf::from(home).join(".config").join("idle");
+        if !config_dir.exists() {
+            if std::fs::create_dir_all(&config_dir).is_ok() {
+                println!("  [ok] created configuration directory {:?}", config_dir);
+            }
+        }
+    }
 
     let reload = Command::new("systemctl")
         .args(["--user", "daemon-reload"])

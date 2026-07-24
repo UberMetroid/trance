@@ -36,8 +36,8 @@ struct FrameLoopState<'a> {
     frame_start: Instant,
     frame_counter: u64,
     fps_report: Instant,
-    achieved_fps: f32,
     use_hw_scaling: bool,
+    session_start: Instant,
 }
 
 pub fn run_frame_loop(
@@ -81,6 +81,7 @@ pub fn run_frame_loop(
         fps_report: *fps_report,
         achieved_fps: *achieved_fps,
         use_hw_scaling,
+        session_start: Instant::now(),
     };
 
     while !state.stop.load(Ordering::Relaxed) && state.presenter.is_visible() {
@@ -134,6 +135,7 @@ fn present_frame(state: &mut FrameLoopState) {
                 let mut pixels = s.session.raster_viewport(
                     0, 0, s.cols, s.rows, s.cols, s.rows, target_w, target_h, scanlines,
                 );
+                apply_fade_in(&mut pixels, state.frame_start.duration_since(state.session_start));
                 maybe_draw_overlays(
                     &mut pixels,
                     target_w,
@@ -184,6 +186,7 @@ fn present_frame(state: &mut FrameLoopState) {
                 target_h,
                 scanlines,
             );
+            apply_fade_in(&mut pixels, state.frame_start.duration_since(state.session_start));
             maybe_draw_overlays(
                 &mut pixels,
                 target_w,
@@ -219,5 +222,22 @@ fn update_fps_counter(state: &mut FrameLoopState, frame_index: u64) {
 
     if elapsed < state.frame_duration {
         thread::sleep(state.frame_duration - elapsed);
+    }
+}
+
+fn apply_fade_in(pixels: &mut [u8], elapsed: Duration) {
+    let fade_duration = Duration::from_millis(500);
+    if elapsed >= fade_duration {
+        return;
+    }
+
+    let alpha_multiplier = elapsed.as_secs_f32() / fade_duration.as_secs_f32();
+    let mult = (alpha_multiplier * 255.0) as u32;
+
+    for chunk in pixels.chunks_exact_mut(4) {
+        chunk[0] = ((chunk[0] as u32 * mult) / 255) as u8;
+        chunk[1] = ((chunk[1] as u32 * mult) / 255) as u8;
+        chunk[2] = ((chunk[2] as u32 * mult) / 255) as u8;
+        chunk[3] = ((chunk[3] as u32 * mult) / 255) as u8;
     }
 }

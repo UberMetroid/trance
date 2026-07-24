@@ -49,12 +49,14 @@ pub fn get_screensaver_dirs() -> Vec<PathBuf> {
     if let Ok(xdg_data) = std::env::var("XDG_DATA_HOME") {
         if is_safe_data_root(&xdg_data) {
             dirs.push(PathBuf::from(&xdg_data).join("idle").join("screensavers"));
+            dirs.push(PathBuf::from(&xdg_data).join("idle").join("savers"));
             dirs.push(PathBuf::from(xdg_data).join("trance").join("screensavers"));
         }
     } else if let Ok(home) = std::env::var("HOME")
         && is_safe_data_root(&home)
     {
         let home_path = PathBuf::from(home);
+        dirs.push(home_path.join(".config").join("idle").join("savers"));
         for brand in ["idle", "trance"] {
             dirs.push(
                 home_path
@@ -62,6 +64,13 @@ pub fn get_screensaver_dirs() -> Vec<PathBuf> {
                     .join("share")
                     .join(brand)
                     .join("screensavers"),
+            );
+            dirs.push(
+                home_path
+                    .join(".local")
+                    .join("share")
+                    .join(brand)
+                    .join("savers"),
             );
             dirs.push(
                 home_path

@@ -78,9 +78,17 @@ pub fn pick_saver_name(config: &DaemonConfig, seed_micros: u64) -> String {
     if let Some(active) = config
         .active_saver
         .as_deref()
-        .filter(|&s| is_allowed_saver(s))
+        .filter(|&s| s == "random" || s == "shuffle" || is_allowed_saver(s))
     {
-        return active.to_string();
+        if active == "random" || active == "shuffle" {
+            let savers = idle_runner::discovery::detect_screensavers();
+            if !savers.is_empty() {
+                let index = (seed_micros as usize) % savers.len();
+                return savers[index].clone();
+            }
+        } else {
+            return active.to_string();
+        }
     }
 
     let mut seed = seed_micros;
