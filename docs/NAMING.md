@@ -6,13 +6,28 @@ Coordinated rename from historical `trance*` package/binary names.
 
 | Role | Package | Binary / unit | Obsoletes / Provides |
 |------|---------|---------------|----------------------|
-| Daemon | `idlescreen` | `idlescreen-daemon`, unit `idlescreen-daemon.service` | `trance` |
+| Daemon (idle-core) | `idlescreen` | `idlescreen-daemon`, unit `idlescreen-daemon.service` | `trance` |
 | CLI | `idlescreen-cli` | `idlescreen` | `trance-cli` |
-| Savers meta | `idlescreen-savers` | — | `trance-plugins-all` |
+| **All savers** | `idlescreen-savers` | — (hard-depends every `saver-*`) | `trance-plugins-all` |
 | One saver | `saver-<name>` | `.so` under libexec | `trance-plugin-<name>` |
-| COSMIC applet | `idlescreen-applet` | `idlescreen-applet` | `trance-applet` |
 | TUI | `idlescreen-tui` | `idlescreen-tui` | `trance-tui` |
-| COSMIC product | `idlescreen-cosmic` | — | (meta) |
+| **COSMIC product** | **`app-cosmic`** | applet `idlescreen-applet` | `idlescreen-applet`, `trance-applet`, `idlescreen-cosmic` |
+
+## Product install (COSMIC)
+
+```bash
+sudo dnf install app-cosmic
+# or
+sudo apt install app-cosmic
+```
+
+`app-cosmic` (from [app-cosmic](https://github.com/idlescreen/app-cosmic)) **Requires**:
+
+1. **`idlescreen`** — idle-core daemon  
+2. **`idlescreen-savers`** — every official `saver-*` plugin  
+3. Ships the **COSMIC panel applet**
+
+Optional recommends: `idlescreen-cli`, `idlescreen-tui`.
 
 ## Paths
 
@@ -25,12 +40,10 @@ Coordinated rename from historical `trance*` package/binary names.
 
 ## Transitional binaries
 
-Packages also install legacy names as **same binary** (second `[[bin]]` or package asset) so scripts keep working:
-
 - `trance-daemon` → same as `idlescreen-daemon`
 - `trance` → same as `idlescreen`
 
-## Frozen for ABI (not renamed this release)
+## Frozen for ABI
 
 | Surface | Value |
 |---------|--------|
@@ -38,17 +51,8 @@ Packages also install legacy names as **same binary** (second `[[bin]]` or packa
 | Plugin cdylib stem | `libscreensaver_<name>.so` |
 | Rust crate names | `trance-*` (workspace internal) |
 
-D-Bus and plugin FFI stay stable so existing clients and savers keep working.
-A future major may add `io.github.idlescreen.*` aliases.
-
-## Install examples
+## Non-COSMIC install
 
 ```bash
-# Fedora
 sudo dnf install idlescreen idlescreen-cli idlescreen-savers
-sudo dnf install idlescreen-applet   # COSMIC
-sudo dnf install idlescreen-cosmic   # product meta (when published)
-
-# Debian
-sudo apt install idlescreen idlescreen-cli idlescreen-savers
 ```

@@ -1,6 +1,6 @@
 [package]
 name = "trance-daemon"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
 description = "IdleScreen background idle daemon (Wayland screensaver host)"
 license = "Apache-2.0"
@@ -49,7 +49,7 @@ provides = "trance"
 replaces = "trance"
 conflicts = "trance (<< 2.0.0)"
 recommends = "idlescreen-savers, idlescreen-cli, idlescreen-tui"
-suggests = "idlescreen-applet"
+suggests = "app-cosmic"
 section = "utils"
 priority = "optional"
 maintainer-scripts = "debian"
@@ -93,10 +93,10 @@ saver-beams = "*"
 idlescreen-savers = "*"
 idlescreen-cli = "*"
 idlescreen-tui = "*"
-"(idlescreen-applet if cosmic-panel)" = ""
+"(app-cosmic if cosmic-panel)" = ""
 
 [package.metadata.generate-rpm.suggests]
-idlescreen-applet = "*"
+app-cosmic = "*"
 
 [package.metadata.generate-rpm.provides]
 trance = "*"

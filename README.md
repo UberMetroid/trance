@@ -17,6 +17,15 @@ Modular Wayland-native screensaver and ambient display daemon for Linux, written
 
 ## Install (native packages)
 
+### COSMIC product (recommended on COSMIC Desktop)
+
+```bash
+sudo dnf install app-cosmic   # Fedora
+sudo apt install app-cosmic   # Debian/Pop
+```
+
+Pulls `idlescreen` (idle-core daemon), `idlescreen-savers` (all plugins), and the COSMIC applet.
+
 ### Debian / Ubuntu / Pop!_OS
 
 ```bash
@@ -25,7 +34,8 @@ sudo curl -fsSL https://idlescreen.github.io/packages/apt/crateria-keyring.gpg \
   -o /etc/apt/keyrings/idlescreen.gpg
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/idlescreen.gpg] https://idlescreen.github.io/packages/apt stable main" \
   | sudo tee /etc/apt/sources.list.d/idlescreen.list
-sudo apt update && sudo apt install idlescreen
+sudo apt update && sudo apt install app-cosmic   # COSMIC product (daemon+savers+applet)
+# or: sudo apt install idlescreen
 ```
 
 ### Fedora

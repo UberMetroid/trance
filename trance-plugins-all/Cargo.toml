@@ -1,22 +1,23 @@
 [package]
 name = "trance-plugins-all"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
-description = "Meta package for all official IdleScreen saver plugins"
+description = "Meta package that hard-depends on all official IdleScreen saver plugins"
 license = "Apache-2.0"
 
 [lib]
 path = "src/lib.rs"
 crate-type = ["rlib"]
 
+# All official savers — hard Depends so `idlescreen-savers` (and thus
+# `app-cosmic`) always install every plugin, not merely recommend them.
 [package.metadata.deb]
 name = "idlescreen-savers"
 changelog = "debian/changelog"
 copyright = "2026 IdleScreen"
 maintainer = "IdleScreen <jerydleuck@gmail.com>"
-extended-description = "Meta package for all official IdleScreen saver plugins. The default beams effect ships as saver-beams with the core package."
-depends = "idlescreen, saver-beams"
-recommends = "saver-bursts, saver-chaos, saver-cosmos, saver-glyphs, saver-gnats, saver-radar, saver-storm, saver-hearth, saver-ripple"
+extended-description = "Installs every official IdleScreen screensaver plugin (saver-*). Required by the app-cosmic product package."
+depends = "idlescreen, saver-beams, saver-bursts, saver-chaos, saver-cosmos, saver-glyphs, saver-gnats, saver-radar, saver-storm, saver-hearth, saver-ripple"
 provides = "trance-plugins-all"
 replaces = "trance-plugins-all"
 conflicts = "trance-plugins-all (<< 2.0.0)"
@@ -28,16 +29,14 @@ assets = []
 name = "idlescreen-savers"
 release = "1"
 arch = "noarch"
-summary = "Meta package for all official IdleScreen savers"
-description = "Meta package recommending all official IdleScreen screensaver plugins."
+summary = "All official IdleScreen savers"
+description = "Meta package that depends on every official IdleScreen screensaver plugin."
 license = "Apache-2.0"
 assets = []
 
 [package.metadata.generate-rpm.requires]
 idlescreen = "*"
 saver-beams = "*"
-
-[package.metadata.generate-rpm.recommends]
 saver-bursts = "*"
 saver-chaos = "*"
 saver-cosmos = "*"
