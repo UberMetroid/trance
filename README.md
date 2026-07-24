@@ -1,9 +1,9 @@
 # IdleScreen
 
-Core repository: [`idle-core`](https://github.com/idlescreen/idle-core).
+Core repository: [`idle`](https://github.com/idlescreen/idle).
 
-[![CI](https://github.com/idlescreen/idle-core/actions/workflows/ci.yml/badge.svg)](https://github.com/idlescreen/idle-core/actions/workflows/ci.yml)
-[![Security](https://img.shields.io/badge/security-private%20reporting-blue)](https://github.com/idlescreen/idle-core/security/advisories)
+[![CI](https://github.com/idlescreen/idle/actions/workflows/ci.yml/badge.svg)](https://github.com/idlescreen/idle/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/security-private%20reporting-blue)](https://github.com/idlescreen/idle/security/advisories)
 
 Modular Wayland-native screensaver and ambient display daemon for Linux, written in Rust.
 
@@ -17,49 +17,26 @@ Modular Wayland-native screensaver and ambient display daemon for Linux, written
 
 ## Install (native packages)
 
-### COSMIC product (recommended on COSMIC Desktop)
+**Users install a product app, not the engine:**
 
 ```bash
-sudo dnf install idle-cosmic   # Fedora
-sudo apt install idle-cosmic   # Debian/Pop
+# Fedora COSMIC
+sudo dnf install idle-cosmic
+systemctl --user enable --now idle-daemon
+idle status
+
+# Optional controllers
+sudo dnf install idle-tui
 ```
 
-Pulls `idlescreen` (idle-core daemon), `idle-savers` (all plugins), and the COSMIC applet.
+Engine packages (`idle-daemon`, `idle-cli`, `idle-savers`, `idle-saver-*`) are **dependencies** of those products.
 
-### Debian / Ubuntu / Pop!_OS
-
-```bash
-sudo mkdir -p /etc/apt/keyrings
-sudo curl -fsSL https://idlescreen.github.io/packages/apt/crateria-keyring.gpg \
-  -o /etc/apt/keyrings/idlescreen.gpg
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/idlescreen.gpg] https://idlescreen.github.io/packages/apt stable main" \
-  | sudo tee /etc/apt/sources.list.d/idlescreen.list
-sudo apt update && sudo apt install idle-cosmic   # COSMIC product (daemon+savers+applet)
-# or: sudo apt install idle
-```
-
-### Fedora
-
-```bash
-sudo curl -fsSL https://idlescreen.github.io/packages/rpm/crateria.repo \
-  -o /etc/yum.repos.d/idlescreen.repo
-sudo dnf install idle
-```
-
-Keyring and repository drop-in filenames on the package host may still use a
-historical `crateria-*` prefix; the public host is **idlescreen.github.io**.
-Shipped package: **idle** (daemon), **idle-cli** (command `idle`). Legacy idlescreen/trance names are Provided/Obsoleted.
-API stability.
-
-Optional packages: `trance-plugins-all`, `trance-cli` (TUI: [idle-tui](https://github.com/idlescreen/idle-tui)). COSMIC panel
-users can install [idle-cosmic](https://github.com/idlescreen/idle-cosmic)
-separately.
 
 ## Build from source
 
 ```bash
-git clone https://github.com/idlescreen/idle-core.git
-cd idle-core
+git clone https://github.com/idlescreen/idle.git
+cd idle
 cargo build --release -p trance-daemon -p trance-cli  # binaries: idle-daemon, idlescreen
 ```
 
