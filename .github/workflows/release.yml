@@ -56,10 +56,8 @@ jobs:
         run: |
           cargo deb --no-build -p idle-daemon
           cargo deb --no-build -p idle-cli
-          cargo deb --no-build -p idle-plugins-all
           cargo generate-rpm -p idle-daemon
           cargo generate-rpm -p idle-cli
-          cargo generate-rpm -p idle-plugins-all
 
       - name: Install Cosign
         run: |
