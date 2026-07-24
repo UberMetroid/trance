@@ -12,9 +12,19 @@ IdleScreen is a modular, high-performance ambient screensaver host and idle mana
 - **Color Engine**: Configurable palettes (`synthwave`, `cyberpunk`, `neon`, `aurora`, `monokai`, `matrix`).
 - **D-Bus Control**: Control via `idle` CLI or D-Bus methods on `io.github.ubermetroid.trance`.
 
-## Installation & Build
+## Installation & Package Setup
 
-### Prerequisites
+### Quick Install (Universal)
+
+```bash
+curl -fsSL https://idlescreen.github.io/packages/install.sh | sh
+```
+
+### Manual Package Repository Install
+
+If you prefer to manually configure your package manager (`dnf` / `apt`), follow the instructions at [idlescreen.github.io/packages](https://idlescreen.github.io/packages/).
+
+### Building from Source
 
 - Rust 1.80+
 - Wayland development libraries (`libwayland-dev`, `libxkbcommon-dev`, `libdbus-1-dev`)
