@@ -76,8 +76,20 @@ else
         fi
     }
     print_user_hint() {
-        echo "  First-time: systemctl --user enable --now idle-daemon"
-        echo "  or: idlescreen doctor --fix"
+        echo ""
+        echo " 🌌 Welcome to IdleScreen!"
+        echo " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo " High-Performance GPU & Terminal Screensavers for Linux"
+        echo ""
+        echo " 🚀 Quick Start:"
+        echo "    idlescreen tui       Launch live interactive TUI dashboard"
+        echo "    idlescreen status    Check active screensaver & daemon state"
+        echo "    idlescreen doctor    Run system health & Wayland check"
+        echo ""
+        echo " 💡 Desktop Launcher: You can also open 'IdleScreen' from your"
+        echo "                       Desktop Application Launcher menu at any time!"
+        echo " ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
     }
 fi
 
@@ -89,10 +101,7 @@ for_each_user_session try_restart_idle
 
 # Fresh install ($1 == 1): print setup hint. Upgrades stay quiet.
 if [ "${1:-1}" -eq 1 ]; then
-    echo ""
     print_user_hint
-    echo "  COSMIC panel UI (optional): dnf install idle-cosmic"
-    echo ""
 fi
 
 exit 0
