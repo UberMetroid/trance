@@ -11,7 +11,6 @@ use std::process::Command;
 const CRATES: &[&str] = &[
     "idle-daemon",
     "idle-cli",
-    "idle-plugins-all",
     "// applet lives in idlescreen/idle-cosmic"
 ];
 

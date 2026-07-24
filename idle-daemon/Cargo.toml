@@ -1,6 +1,6 @@
 [package]
 name = "idle-daemon"
-version = "2.3.2"
+version = "2.3.3"
 edition = "2024"
 description = "IdleScreen background idle daemon (Wayland screensaver host)"
 license = "Apache-2.0"
@@ -47,11 +47,11 @@ copyright = "2026 IdleScreen"
 maintainer = "IdleScreen <jerydleuck@gmail.com>"
 extended-description = "IdleScreen background idle monitoring and screensaver host for Wayland."
 # Package rename from `trance`. Plugins renamed to saver-*.
-depends = "libc6, fonts-dejavu-core, idle-saver-beams, dbus"
+depends = "libc6, fonts-dejavu-core, dbus"
 provides = "idle, idlescreen, trance"
 replaces = "idlescreen, trance"
 conflicts = "idlescreen (<< 2.1.0), trance (<< 2.0.0)"
-recommends = "idle-savers, idle-cli"
+recommends = "idle-cli, idle-saver-beams, idle-saver-bursts, idle-saver-chaos, idle-saver-cosmos, idle-saver-glyphs, idle-saver-gnats, idle-saver-hearth, idle-saver-radar, idle-saver-ripple, idle-saver-storm"
 suggests = "idle-cosmic"
 section = "utils"
 priority = "optional"
@@ -90,10 +90,19 @@ assets = [
 
 [package.metadata.generate-rpm.requires]
 dejavu-sans-mono-fonts = "*"
-idle-saver-beams = "*"
 
 [package.metadata.generate-rpm.recommends]
 idle-cli = "*"
+idle-saver-beams = "*"
+idle-saver-bursts = "*"
+idle-saver-chaos = "*"
+idle-saver-cosmos = "*"
+idle-saver-glyphs = "*"
+idle-saver-gnats = "*"
+idle-saver-hearth = "*"
+idle-saver-radar = "*"
+idle-saver-ripple = "*"
+idle-saver-storm = "*"
 
 [package.metadata.generate-rpm.suggests]
 idle-cosmic = "*"
