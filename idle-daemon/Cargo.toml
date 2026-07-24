@@ -47,7 +47,7 @@ copyright = "2026 IdleScreen"
 maintainer = "IdleScreen <jerydleuck@gmail.com>"
 extended-description = "IdleScreen background idle monitoring and screensaver host for Wayland."
 # Package rename from `trance`. Plugins renamed to saver-*.
-depends = "libc6, fonts-dejavu-core, dbus"
+depends = "libc6, fonts-dejavu-core, dbus, idle-cli"
 provides = "idle, idlescreen, trance"
 replaces = "idlescreen, trance"
 conflicts = "idlescreen (<< 2.1.0), trance (<< 2.0.0)"
@@ -90,6 +90,7 @@ assets = [
 
 [package.metadata.generate-rpm.requires]
 dejavu-sans-mono-fonts = "*"
+idle-cli = "*"
 
 [package.metadata.generate-rpm.recommends]
 idle-cli = "*"
