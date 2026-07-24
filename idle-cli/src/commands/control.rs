@@ -55,18 +55,19 @@ pub fn cmd_inhibitors(client: &TranceClient) -> Result<()> {
 }
 
 pub fn cmd_preview(client: &TranceClient, args: &[String]) -> Result<()> {
-    let name = args.first().context("usage: idle preview <saver> [--timeout N]")?;
+    let name = args
+        .first()
+        .context("usage: idle preview <saver> [--timeout N]")?;
     client.preview(name).context("starting preview via d-bus")?;
 
-    if let Some(pos) = args.iter().position(|a| a == "--timeout" || a == "-t") {
-        if let Some(sec_str) = args.get(pos + 1) {
-            if let Ok(secs) = sec_str.parse::<u64>() {
-                println!("Preview started. Auto-stopping in {secs} seconds...");
-                std::thread::sleep(std::time::Duration::from_secs(secs));
-                let _ = client.stop_preview();
-                println!("Preview stopped.");
-            }
-        }
+    if let Some(pos) = args.iter().position(|a| a == "--timeout" || a == "-t")
+        && let Some(sec_str) = args.get(pos + 1)
+        && let Ok(secs) = sec_str.parse::<u64>()
+    {
+        println!("Preview started. Auto-stopping in {secs} seconds...");
+        std::thread::sleep(std::time::Duration::from_secs(secs));
+        let _ = client.stop_preview();
+        println!("Preview stopped.");
     }
     Ok(())
 }

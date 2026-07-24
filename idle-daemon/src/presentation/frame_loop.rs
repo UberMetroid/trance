@@ -136,7 +136,10 @@ fn present_frame(state: &mut FrameLoopState) {
                 let mut pixels = s.session.raster_viewport(
                     0, 0, s.cols, s.rows, s.cols, s.rows, target_w, target_h, scanlines,
                 );
-                apply_fade_in(&mut pixels, state.frame_start.duration_since(state.session_start));
+                apply_fade_in(
+                    &mut pixels,
+                    state.frame_start.duration_since(state.session_start),
+                );
                 maybe_draw_overlays(
                     &mut pixels,
                     target_w,
@@ -187,7 +190,10 @@ fn present_frame(state: &mut FrameLoopState) {
                 target_h,
                 scanlines,
             );
-            apply_fade_in(&mut pixels, state.frame_start.duration_since(state.session_start));
+            apply_fade_in(
+                &mut pixels,
+                state.frame_start.duration_since(state.session_start),
+            );
             maybe_draw_overlays(
                 &mut pixels,
                 target_w,

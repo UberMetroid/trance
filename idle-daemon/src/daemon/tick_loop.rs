@@ -121,18 +121,13 @@ fn is_on_battery() -> bool {
                 if type_str == "Mains" {
                     has_ac = true;
                     if let Ok(o) = std::fs::read_to_string(p.join("online")) {
-                        if o.trim() == "0" {
-                            ac_online = false;
-                        } else {
-                            ac_online = true;
-                        }
+                        ac_online = o.trim() != "0";
                     }
-                } else if type_str == "Battery" {
-                    if let Ok(s) = std::fs::read_to_string(p.join("status")) {
-                        if s.trim() == "Discharging" {
-                            battery_discharging = true;
-                        }
-                    }
+                } else if type_str == "Battery"
+                    && let Ok(s) = std::fs::read_to_string(p.join("status"))
+                    && s.trim() == "Discharging"
+                {
+                    battery_discharging = true;
                 }
             }
         }

@@ -67,23 +67,27 @@ fn apply_render_scale(config: &mut DaemonConfig, val: &str) {
 }
 
 /// Parse one non-comment config line (`key: value` or `[section]`) into the config.
-pub(crate) fn apply_config_line(config: &mut DaemonConfig, current_section: &mut String, line: &str) {
+pub(crate) fn apply_config_line(
+    config: &mut DaemonConfig,
+    current_section: &mut String,
+    line: &str,
+) {
     let line = line.trim();
     if line.is_empty() || line.starts_with('#') {
         return;
     }
-    
+
     if line.starts_with('[') && line.ends_with(']') {
         *current_section = line[1..line.len() - 1].to_string();
         return;
     }
-    
+
     let Some(idx) = line.find(':') else {
         return;
     };
     let key = line[..idx].trim();
     let val = line[idx + 1..].trim().trim_matches('"').trim_matches('\'');
-    
+
     if current_section == "saver" {
         config.saver_params.insert(key.to_string(), val.to_string());
     } else if current_section.starts_with("saver.") {

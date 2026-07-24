@@ -4,7 +4,9 @@ use std::process::Command;
 use super::doctor_checks::CheckResult;
 use super::doctor_env::{check_protocol_hints, check_wayland};
 use super::doctor_fs::{check_config_parses, check_shm_permissions, check_yaml_syntax};
-use super::doctor_service::{check_dbus, check_inhibitor, check_running_pid, check_systemd_service};
+use super::doctor_service::{
+    check_dbus, check_inhibitor, check_running_pid, check_systemd_service,
+};
 use super::doctor_sys::{check_fonts, check_package_install};
 
 /// Run diagnostics. When `fix` is true, attempt to reload/enable/restart the
@@ -79,10 +81,8 @@ fn fix_user_service() -> Result<()> {
 
     if let Ok(home) = std::env::var("HOME") {
         let config_dir = std::path::PathBuf::from(home).join(".config").join("idle");
-        if !config_dir.exists() {
-            if std::fs::create_dir_all(&config_dir).is_ok() {
-                println!("  [ok] created configuration directory {:?}", config_dir);
-            }
+        if !config_dir.exists() && std::fs::create_dir_all(&config_dir).is_ok() {
+            println!("  [ok] created configuration directory {:?}", config_dir);
         }
     }
 
